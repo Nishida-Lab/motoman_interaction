@@ -16,8 +16,6 @@ from cv_bridge import CvBridge, CvBridgeError
 import image_geometry
 # TF
 import tf2_ros
-import tv_conversions
-import geometry_msgs.msg
 
 # OpenCV
 import cv
