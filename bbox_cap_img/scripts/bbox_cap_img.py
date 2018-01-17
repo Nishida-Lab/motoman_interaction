@@ -10,7 +10,7 @@ from jsk_recognition_msgs.msg import BoundingBox
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
 # ImageArray
-from motoman_interactive_msgs.msg import ImageArray
+from motoman_interaction_msgs.msg import ImageArray
 # CV Bridge
 from cv_bridge import CvBridge, CvBridgeError
 import image_geometry
@@ -39,8 +39,11 @@ class BBoxCapImg:
         self.bbox_sub = rospy.Subscriber('/clustering_result', BoundingBoxArray, self.bbArrayCb, queue_size=1)
 
         # ======= Camera Callback ======== #
-        self.img_sub = rospy.Subscriber('/kinect2/hd/image_color', Image, self.imgCb)
-        self.cam_sub = rospy.Subscriber('/kinect2/hd/camera_info',CameraInfo, self.camInfoCb)
+        # self.img_sub = rospy.Subscriber('/kinect2/hd/image_color', Image, self.imgCb)
+        # self.cam_sub = rospy.Subscriber('/kinect2/hd/camera_info',CameraInfo, self.camInfoCb)
+        self.img_sub = rospy.Subscriber('/kinect_second/hd/image_color', Image, self.imgCb)
+        self.cam_sub = rospy.Subscriber('/kinect_second/hd/camera_info',CameraInfo, self.camInfoCb)
+
         self.bridge = CvBridge()
         # ======== Camera Model ======== #
         self.camera_model = image_geometry.PinholeCameraModel()
@@ -95,7 +98,7 @@ class BBoxCapImg:
             img_array_msg.images.append(cap_topic_img)
 
 
-        img_array_msg.header.stamp = bbbox_.header.stamp
+        img_array_msg.header.stamp = bbox_.header.stamp
         img_array_msg.header.frame_id = self.cam_link_frame
         self.img_array_pub.publish(img_array_msg)
         print "Finish to Write !"
@@ -106,7 +109,8 @@ class BBoxCapImg:
 
         while not get_tf_flg:
             try:
-                transform = tfBuffer.lookup_transform(self.cam_link_frame, target, tf_time, rospy.Duration(1))
+                # transform = tfBuffer.lookup_transform(self.cam_link_frame, target, tf_time, rospy.Duration(1))
+                transform = self.tf_buffer.lookup_transform(self.cam_link_frame, target, tf_time, rospy.Duration(1))
                 get_tf_flg = True
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 rospy.logerr('LookupTransform Error !')
