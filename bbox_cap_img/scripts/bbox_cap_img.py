@@ -39,8 +39,6 @@ class BBoxCapImg:
         self.bbox_sub = rospy.Subscriber('/clustering_result', BoundingBoxArray, self.bbArrayCb, queue_size=1)
 
         # ======= Camera Callback ======== #
-        # self.img_sub = rospy.Subscriber('/kinect2/hd/image_color', Image, self.imgCb)
-        # self.cam_sub = rospy.Subscriber('/kinect2/hd/camera_info',CameraInfo, self.camInfoCb)
         self.img_sub = rospy.Subscriber('/kinect_second/hd/image_color', Image, self.imgCb)
         self.cam_sub = rospy.Subscriber('/kinect_second/hd/camera_info',CameraInfo, self.camInfoCb)
 
@@ -109,7 +107,6 @@ class BBoxCapImg:
 
         while not get_tf_flg:
             try:
-                # transform = tfBuffer.lookup_transform(self.cam_link_frame, target, tf_time, rospy.Duration(1))
                 transform = self.tf_buffer.lookup_transform(self.cam_link_frame, target, tf_time, rospy.Duration(1))
                 get_tf_flg = True
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
