@@ -15,6 +15,11 @@ add_message_files(
   BoundingBoxWithTagArray.msg
 )
 
+add_service_files(
+  FILES
+  ImageRecognition.srv
+  )
+
 generate_messages(
   DEPENDENCIES
   std_msgs sensor_msgs jsk_recognition_msgs
