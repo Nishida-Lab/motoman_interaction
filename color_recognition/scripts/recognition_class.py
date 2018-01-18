@@ -62,37 +62,47 @@ class ColorRecognition():
 
         print "H: "+str(h)+" S: "+str(s)+" V: "+str(v)
 
-        if h < 50 and s < 50 and v < 100:
-        # if h < 50 and s < 50:
+        if h <= 70 and s <= 50 and v <= 100:
+        # if h <= 50 and s <= 50:
             return "black"
 
-        if 0 < h and h < 10:
+        if (165 <= h and h <= 180) or (0 <= h and h <= 10):
             return "red"
 
-        elif 50 < h and h < 85:
+        elif 50 <= h and h <= 85:
             return "green"
 
-        elif 95 < h and h < 130:
+        elif 95 <= h and h <= 130:
             return "blue"
 
         else:
             return "others"
 
 
-    def __call__(self, frame):
+    def __call__(self, image):
 
-        new_frame = frame
-        display_frame = copy.deepcopy(new_frame)
+        new_image = image
+        # display_image = copy.deepcopy(new_image)
 
-        dominant_bgr = self.get_dominant_color(frame)
+        width, height = image.shape[1::-1]
+
+        top = int(height/2)
+        bottom = int(2*height/3)
+
+        left = int(width/3)
+        right = int(2*width/3)
+
+        image = image[top:bottom, left:right]
+
+        dominant_bgr = self.get_dominant_color(image)
         dominant_hsv = self.bgr_to_hsv(dominant_bgr)
 
         self.dominant_color_display[:] = dominant_bgr
 
         recognition_result = self.color_recognition(dominant_hsv)
 
-        cv2.imshow('frame',display_frame)
-        cv2.imshow("dominant", self.dominant_color_display)
-        cv2.waitKey(3)
+        # cv2.imshow('image',display_image)
+        # cv2.imshow("dominant", self.dominant_color_display)
+        # cv2.waitKey(3)
 
         return recognition_result
