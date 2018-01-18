@@ -12,6 +12,7 @@ add_message_files(
   StringArray.msg
   ImageArray.msg
   BoundingBoxWithTag.msg
+  BoundingBoxWithTagArray.msg
 )
 
 generate_messages(
