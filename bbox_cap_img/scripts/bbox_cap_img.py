@@ -108,10 +108,10 @@ class BBoxCapImg:
         while not get_tf_flg:
             try:
                 transform = self.tf_buffer.lookup_transform(self.cam_link_frame, target, tf_time, rospy.Duration(1))
+                # transform = self.tf_buffer.lookup_transform(self.cam_link_frame, target, rospy.Time(0), rospy.Duration(1))
                 get_tf_flg = True
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 rospy.logerr('LookupTransform Error !')
-                continue
 
         return transform
 
