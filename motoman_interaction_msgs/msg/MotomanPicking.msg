@@ -1,4 +1,4 @@
 # Object name with Goal place No.
 Header header
-string object
+string tag
 int64 num
