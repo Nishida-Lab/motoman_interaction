@@ -49,9 +49,6 @@ class BBoxCapImg:
         # ======== Camera Model ======== #
         self.camera_model = image_geometry.PinholeCameraModel()
 
-        # ======== ImageArray Publisher ======== #
-        # self.img_array_pub = rospy.Publisher('/bbox_cap_img_array', ImageArray, queue_size=1)
-
     def imgCb(self,data):
         self.cam_link_frame = data.header.frame_id
         try:
@@ -98,23 +95,22 @@ class BBoxCapImg:
             cap_topic_img = self.bridge.cv2_to_imgmsg(cap_img)
             img_array_msg.images.append(cap_topic_img)
 
-
         img_array_msg.header.stamp = bbox_.header.stamp
         img_array_msg.header.frame_id = self.cam_link_frame
-
-        # self.img_array_pub.publish(img_array_msg)
 
         rospy.wait_for_service('color_recongnition')
         try:
             color_recongnition = rospy.ServiceProxy('color_recongnition', ImageRecognition)
             resp = color_recongnition(img_array_msg)
             print "Finish to Write !"
-            print resp1.results
+            # print resp.results
+            print resp.results.strings
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
 
     def getTF(self, num, tf_time):
+
         target = "object_" + str(num)
         get_tf_flg = False
 
@@ -128,35 +124,8 @@ class BBoxCapImg:
         return transform
 
 
-# def add_two_ints_client(x, y):
-#     rospy.wait_for_service('add_two_ints')
-#     try:
-#         add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
-#         resp1 = add_two_ints(x, y)
-#         return resp1.sum
-#     except rospy.ServiceException, e:
-#         print "Service call failed: %s"%e
-
-
-# def usage():
-#     return "%s [x y]"%sys.argv[0]
-
-
-# if __name__ == "__main__":
-
-#     if len(sys.argv) == 3:
-#         x = int(sys.argv[1])
-#         y = int(sys.argv[2])
-#     else:
-#         print usage()
-#         sys.exit(1)
-
-#     print "Requesting %s+%s"%(x, y)
-#     print "%s + %s = %s"%(x, y, add_two_ints_client(x,y))
-
-
-
 if __name__ == '__main__':
+
     rospy.init_node("bbox_cap_image")
     bbox_cap_img = BBoxCapImg()
     rospy.spin()
