@@ -4,8 +4,8 @@
 # ROS
 import rospy
 # Bounding Box Array, Bounding Box
-from jsk_recognition_msgs.msg import BoundingBoxArray
-from jsk_recognition_msgs.msg import BoundingBox
+from motoman_viz_msgs.msg import BoundingBoxArray
+from motoman_viz_msgs.msg import BoundingBox
 # Camera
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
@@ -44,6 +44,9 @@ class BBoxCapImg:
         # ======= Camera Callback ======== #
         self.img_sub = rospy.Subscriber('/kinect_second/hd/image_color', Image, self.imgCb)
         self.cam_sub = rospy.Subscriber('/kinect_second/hd/camera_info',CameraInfo, self.camInfoCb)
+
+        # ======= Reconginized BoudingBox Callback ======== #
+        self.result_bbox_pub = rospy.Publisher('/recognition_result', BoundingBoxArray, queue_size=1)
 
         self.bridge = CvBridge()
         # ======== Camera Model ======== #
@@ -99,12 +102,18 @@ class BBoxCapImg:
         img_array_msg.header.frame_id = self.cam_link_frame
 
         rospy.wait_for_service('color_recongnition')
+        pub_bbox_array_ = BoundingBoxArray()
+        pub_bbox_array_ = message
         try:
             color_recongnition = rospy.ServiceProxy('color_recongnition', ImageRecognition)
             resp = color_recongnition(img_array_msg)
+            for i, r in enumerate(resp.results.strings):
+                pub_bbox_array_.boxes[i].tag = r
+
+            self.result_bbox_pub.publish(pub_bbox_array_)
+            print resp.results.strings
             print "Finish to Write !"
             # print resp.results
-            print resp.results.strings
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
