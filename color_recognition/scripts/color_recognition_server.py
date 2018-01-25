@@ -27,10 +27,14 @@ class ColorRecognitionServer:
     def get_color_string_array(self,ros_image_array):
 
         color_string_array = []
+        image_cnt = 0
 
         for ros_image in ros_image_array:
             cv_image = self.bridge.imgmsg_to_cv2(ros_image, "8UC3")
             color_string_array.append(self.detection(cv_image))
+
+            cv2.imwrite(str(image_cnt)+".jpg", cv_image)
+            image_cnt += 1
 
         return color_string_array
 
