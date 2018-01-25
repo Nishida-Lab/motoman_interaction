@@ -74,7 +74,7 @@ class BBoxCapImg:
         print "There are " + str(len(bbox_.boxes)) + " objects."
         print "Start to get TF...."
         for i in range(len(bbox_.boxes)):
-            self.trans.append(self.getTF(i+1, bbox_.header.stamp))
+            self.trans.append(self.getTF(i+1, rospy.Time(0)))
         print "Finish to get TF !"
         self.camera_model.fromCameraInfo(cam_info_)
         for i, bb in enumerate(bbox_.boxes):
