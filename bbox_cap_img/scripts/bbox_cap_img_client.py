@@ -120,6 +120,7 @@ class BBoxCapImg:
                 get_tf_flg = True
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 rospy.logerr('LookupTransform Error !')
+                # raise
 
         return transform
 
