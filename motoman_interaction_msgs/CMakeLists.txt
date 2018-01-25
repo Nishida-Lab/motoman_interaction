@@ -13,6 +13,7 @@ add_message_files(
   ImageArray.msg
   BoundingBoxWithTag.msg
   BoundingBoxWithTagArray.msg
+  MotomanPicking.msg
 )
 
 add_service_files(
