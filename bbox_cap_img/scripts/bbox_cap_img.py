@@ -91,7 +91,8 @@ class BBoxCapImg:
             pix_point_min.append(tuple(min_2d.astype(int)))
             pix_point_max.append(tuple(max_2d.astype(int)))
             
-            cap_img = img_[pix_point_min[i][1]:pix_point_max[i][1], pix_point_min[i][0]:pix_point_max[i][0]]
+            # cap_img = img_[pix_point_min[i][1]:pix_point_max[i][1], pix_point_min[i][0]:pix_point_max[i][0]]
+            cap_img = img_[pix_point_min[i][0]:pix_point_max[i][0], pix_point_min[i][1]:pix_point_max[i][1]]
             cap_topic_img = self.bridge.cv2_to_imgmsg(cap_img)
             img_array_msg.images.append(cap_topic_img)
 
