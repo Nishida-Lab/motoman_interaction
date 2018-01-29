@@ -62,8 +62,8 @@ class ColorRecognition():
 
         print "H: "+str(h)+" S: "+str(s)+" V: "+str(v)
 
-        if h <= 70 and s <= 50 and v <= 100:
-        # if h <= 50 and s <= 50:
+        # if h <= 70 and s <= 50 and v <= 100:
+        if h <= 70 and s <= 80 and v <= 100:
             return "black"
 
         if (165 <= h and h <= 180) or (0 <= h and h <= 10):
