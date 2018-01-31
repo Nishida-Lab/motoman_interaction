@@ -27,6 +27,7 @@ import cv2
 # Basic Python Libs
 from math import *
 import numpy as np
+import copy
 
 
 class BBoxCapImg:
@@ -78,87 +79,105 @@ class BBoxCapImg:
             self.trans.append(self.getTF(i+1, rospy.Time(0)))
         print "Finish to get TF !"
         self.camera_model.fromCameraInfo(cam_info_)
+
+        img__ = copy.deepcopy(img_)
+        
         for i, bb in enumerate(bbox_.boxes):
 
-            # q = np.array([bb.pose.orientation.x,bb.pose.orientation.y,bb.pose.orientation.z,bb.pose.orientation.w])
             q = np.array([self.trans[i].transform.rotation.x,self.trans[i].transform.rotation.y,self.trans[i].transform.rotation.z,self.trans[i].transform.rotation.w])
             H = tf.transformations.quaternion_matrix(q)
-            # print bb
-            # print H
             H[0][3] = self.trans[i].transform.translation.x
             H[1][3] = self.trans[i].transform.translation.y
             H[2][3] = self.trans[i].transform.translation.z
 
-            # H[0][3] = bb.pose.position.x
-            # H[1][3] = bb.pose.position.y
-            # H[2][3] = bb.pose.position.z
-
             inv_H = np.linalg.inv(H)
-            # print
-            # print H
 
-            print "aaaaaaaaaaaaaaa"
-            print self.trans[i]
 
             x = bb.dimensions.x
             y = bb.dimensions.y
             z = bb.dimensions.z
-            print inv_H.shape
 
-            P0 = np.dot(inv_H, np.array([-x/2., y/2., 0, 1.])[:, np.newaxis])
-            P1 = np.dot(inv_H, np.array([-x/2., -y/2., 0, 1.])[:, np.newaxis])
-            P2 = np.dot(inv_H, np.array([x/2., y/2., 0, 1.])[:, np.newaxis])
-            P3 = np.dot(inv_H, np.array([x/2., -y/2., 0, 1.])[:, np.newaxis])
+            P0 = np.dot(H, np.array([-x/2., y/2., 0, 1.])[:, np.newaxis])
+            P1 = np.dot(H, np.array([-x/2., -y/2., 0, 1.])[:, np.newaxis])
+            P2 = np.dot(H, np.array([x/2., y/2., 0, 1.])[:, np.newaxis])
+            P3 = np.dot(H, np.array([x/2., -y/2., 0, 1.])[:, np.newaxis])
 
-            P4 = np.dot(inv_H, np.array([-x/2., y/2., -z, 1.])[:, np.newaxis])
-            P5 = np.dot(inv_H, np.array([-x/2., -y/2., -z, 1.])[:, np.newaxis])
-            P6 = np.dot(inv_H, np.array([x/2., y/2., -z, 1.])[:, np.newaxis])
-            P7 = np.dot(inv_H, np.array([x/2., -y/2., -z, 1.])[:, np.newaxis])
+            P4 = np.dot(H, np.array([-x/2., y/2., -z, 1.])[:, np.newaxis])
+            P5 = np.dot(H, np.array([-x/2., -y/2., -z, 1.])[:, np.newaxis])
+            P6 = np.dot(H, np.array([x/2., y/2., -z, 1.])[:, np.newaxis])
+            P7 = np.dot(H, np.array([x/2., -y/2., -z, 1.])[:, np.newaxis])
 
-            # P0_ = self.camera_model.project3dToPixel(tuple())
+            # P0 = np.dot(inv_H, np.array([-x/2., y/2., 0, 1.])[:, np.newaxis])
+            # P1 = np.dot(inv_H, np.array([-x/2., -y/2., 0, 1.])[:, np.newaxis])
+            # P2 = np.dot(inv_H, np.array([x/2., y/2., 0, 1.])[:, np.newaxis])
+            # P3 = np.dot(inv_H, np.array([x/2., -y/2., 0, 1.])[:, np.newaxis])
 
-            P_ = np.hstack((P0,P1,P2,P3,P4,P5,P6,P7))
-            # print
-            # print P_
-            # print P_[0,:].max()
+            # P4 = np.dot(inv_H, np.array([-x/2., y/2., -z, 1.])[:, np.newaxis])
+            # P5 = np.dot(inv_H, np.array([-x/2., -y/2., -z, 1.])[:, np.newaxis])
+            # P6 = np.dot(inv_H, np.array([x/2., y/2., -z, 1.])[:, np.newaxis])
+            # P7 = np.dot(inv_H, np.array([x/2., -y/2., -z, 1.])[:, np.newaxis])
 
-            min_3d = np.empty(0)
-            max_3d = np.empty(0)
+            P0_2d = np.array( self.camera_model.project3dToPixel(tuple(P0[0:3]) ))
+            P1_2d = np.array( self.camera_model.project3dToPixel(tuple(P1[0:3]) ))
+            P2_2d = np.array( self.camera_model.project3dToPixel(tuple(P2[0:3]) ))
+            P3_2d = np.array( self.camera_model.project3dToPixel(tuple(P3[0:3]) ))
 
-            # min_3d = np.append(min_3d, P_[0,:].min())
-            # min_3d = np.append(min_3d, P_[1,:].min())
-            # min_3d = np.append(min_3d, P_[2,:].min())
- 
-            # max_3d = np.append(max_3d, P_[0,:].max())
-            # max_3d = np.append(max_3d, P_[1,:].max())
-            # max_3d = np.append(max_3d, P_[2,:].max())
+            P4_2d = np.array( self.camera_model.project3dToPixel(tuple(P4[0:3]) ))
+            P5_2d = np.array( self.camera_model.project3dToPixel(tuple(P5[0:3]) ))
+            P6_2d = np.array( self.camera_model.project3dToPixel(tuple(P6[0:3]) ))
+            P7_2d = np.array( self.camera_model.project3dToPixel(tuple(P7[0:3]) ))
 
-            min_3d = np.empty(0)
-            max_3d = np.empty(0)
-            min_3d = np.append(min_3d, self.trans[i].transform.translation.x - bb.dimensions.x/2.)
-            min_3d = np.append(min_3d, self.trans[i].transform.translation.y - bb.dimensions.y/2.)
-            min_3d = np.append(min_3d, self.trans[i].transform.translation.z - bb.dimensions.z)
-            max_3d = min_3d + np.array([bb.dimensions.x, bb.dimensions.y, bb.dimensions.z])
+            P_2d_top = np.vstack((P0_2d,P1_2d,P2_2d,P3_2d))
+            P_2d_bottom = np.vstack((P4_2d,P5_2d,P6_2d,P7_2d))
 
-            min_2d = np.array( self.camera_model.project3dToPixel(tuple(min_3d)) )
-            max_2d = np.array( self.camera_model.project3dToPixel(tuple(max_3d)) )
+            min_2d_x = int(P_2d_top[np.argmin(P_2d_top[:,0])][0])
+            min_2d_y = int(P_2d_top[np.argmin(P_2d_top[:,1])][1])
 
-            center_2d = np.array( self.camera_model.project3dToPixel((self.trans[i].transform.translation.x,self.trans[i].transform.translation.y,self.trans[i].transform.translation.z)) )
+            max_2d_x = int(P_2d_bottom[np.argmax(P_2d_bottom[:,0])][0])
+            max_2d_y = int(P_2d_bottom[np.argmax(P_2d_bottom[:,1])][1])
 
-            pix_point_min.append(tuple(min_2d.astype(int)))
-            pix_point_max.append(tuple(max_2d.astype(int)))
+            print "ssssssssssssss"
+            print P0_2d
+            print "top"
+            print P_2d_top
+            print "min2d"
+            print min_2d_x
+            print min_2d_y
+            print "bottom"
+            print P_2d_bottom
+            print "max2d"
+            print max_2d_x
+            print max_2d_y
+
+            print "c_min"
+            print tuple(P_2d_top[np.argmin(P_2d_top[:,0])].astype(int))
+            print "c_max"
+            print tuple(P_2d_bottom[np.argmax(P_2d_bottom[:,0])].astype(int))
+
+            # pix_point_min.append(tuple(P_2d_top[np.argmin(P_2d_top[:,0])].astype(int)))
+            # pix_point_max.append(tuple(P_2d_bottom[np.argmax(P_2d_bottom[:,0])].astype(int)))
+
+            pix_point_min.append((min_2d_x, min_2d_y))
+            pix_point_max.append((max_2d_x, max_2d_y))
 
             cap_img = img_[pix_point_min[i][1]:pix_point_max[i][1], pix_point_min[i][0]:pix_point_max[i][0]]
             cap_topic_img = self.bridge.cv2_to_imgmsg(cap_img)
             img_array_msg.images.append(cap_topic_img)
 
-            print min_2d
-            print max_2d
+            cv2.circle(img__, tuple(P0_2d.astype(int)), 5, (0, 255, 255), -1)
+            cv2.circle(img__, tuple(P1_2d.astype(int)), 5, (0, 0, 255), -1)
+            cv2.circle(img__, tuple(P2_2d.astype(int)), 5, (0, 255, 0), -1)
+            cv2.circle(img__, tuple(P3_2d.astype(int)), 5, (255, 0, 0), -1)
 
-            cv2.circle(img_, tuple(center_2d.astype(int)), 5, (255, 255, 0), -1)
-            cv2.circle(img_, tuple(min_2d.astype(int)), 5, (255, 0, 0), -1)
-            cv2.circle(img_, tuple(max_2d.astype(int)), 5, (0, 0, 255), -1)
-            cv2.imwrite("raw_img.jpg", img_)
+            cv2.circle(img__, tuple(P4_2d.astype(int)), 5, (0, 120, 120), -1)
+            cv2.circle(img__, tuple(P5_2d.astype(int)), 5, (0, 0, 120), -1)
+            cv2.circle(img__, tuple(P6_2d.astype(int)), 5, (0, 120, 0), -1)
+            cv2.circle(img__, tuple(P7_2d.astype(int)), 5, (120, 0, 0), -1)
+
+            center_2d = np.array( self.camera_model.project3dToPixel((self.trans[i].transform.translation.x,self.trans[i].transform.translation.y,self.trans[i].transform.translation.z)) )
+
+            cv2.circle(img__, tuple(center_2d.astype(int)), 5, (255, 255, 0), -1)
+            cv2.imwrite("raw_img.jpg", img__)
 
 
         img_array_msg.header.stamp = bbox_.header.stamp

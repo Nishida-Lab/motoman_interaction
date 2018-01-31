@@ -18,7 +18,6 @@ from cv_bridge import CvBridge, CvBridgeError
 import image_geometry
 # TF
 import tf2_ros
-import tf
 
 # OpenCV
 import cv
@@ -27,7 +26,6 @@ import cv2
 # Basic Python Libs
 from math import *
 import numpy as np
-import copy
 
 
 class BBoxCapImg:
@@ -62,14 +60,12 @@ class BBoxCapImg:
             print(e)
 
     def camInfoCb(self,data):
-        # self.raw_cam_info = data
-        self.raw_cam_info = copy.deepcopy(data)
+        self.raw_cam_info = data
 
     def bbArrayCb(self, message):
         img_array_msg = ImageArray()
 
-        # bbox_ = message
-        bbox_ = copy.deepcopy(message)
+        bbox_ = message
         img_ = self.raw_img
         cam_info_ = self.raw_cam_info
         pix_point_min = list()
@@ -79,87 +75,28 @@ class BBoxCapImg:
         print "Start to get TF...."
         for i in range(len(bbox_.boxes)):
             self.trans.append(self.getTF(i+1, rospy.Time(0)))
-            # self.trans.append(self.getTF(i+1, bbox_.header.stamp))
- 
         print "Finish to get TF !"
         self.camera_model.fromCameraInfo(cam_info_)
-
-        img__ = copy.deepcopy(img_)
-
         for i, bb in enumerate(bbox_.boxes):
+            min_3d = np.empty(0)
+            max_3d = np.empty(0)
+            min_3d = np.append(min_3d, self.trans[i].transform.translation.x - bb.dimensions.x/2.)
+            min_3d = np.append(min_3d, self.trans[i].transform.translation.y - bb.dimensions.y/2.)
+            min_3d = np.append(min_3d, self.trans[i].transform.translation.z - bb.dimensions.z)
+            max_3d = min_3d + np.array([bb.dimensions.x, bb.dimensions.y, bb.dimensions.z])
 
-            q = np.array([self.trans[i].transform.rotation.x,self.trans[i].transform.rotation.y,self.trans[i].transform.rotation.z,self.trans[i].transform.rotation.w])
-            H = tf.transformations.quaternion_matrix(q)
-            H[0][3] = self.trans[i].transform.translation.x
-            H[1][3] = self.trans[i].transform.translation.y
-            H[2][3] = self.trans[i].transform.translation.z
+            min_2d = np.array( self.camera_model.project3dToPixel(tuple(min_3d)) )
+            max_2d = np.array( self.camera_model.project3dToPixel(tuple(max_3d)) )
 
-            x = bb.dimensions.x
-            y = bb.dimensions.y
-            z = bb.dimensions.z
+            print min_2d
+            print max_2d
 
-            P0 = np.dot(H, np.array([-x/2., y/2., 0, 1.])[:, np.newaxis])
-            P1 = np.dot(H, np.array([-x/2., -y/2., 0, 1.])[:, np.newaxis])
-            P2 = np.dot(H, np.array([x/2., y/2., 0, 1.])[:, np.newaxis])
-            P3 = np.dot(H, np.array([x/2., -y/2., 0, 1.])[:, np.newaxis])
-
-            P4 = np.dot(H, np.array([-x/2., y/2., -z, 1.])[:, np.newaxis])
-            P5 = np.dot(H, np.array([-x/2., -y/2., -z, 1.])[:, np.newaxis])
-            P6 = np.dot(H, np.array([x/2., y/2., -z, 1.])[:, np.newaxis])
-            P7 = np.dot(H, np.array([x/2., -y/2., -z, 1.])[:, np.newaxis])
-
-            P0_2d = np.array( self.camera_model.project3dToPixel(tuple(P0[0:3]) ))
-            P1_2d = np.array( self.camera_model.project3dToPixel(tuple(P1[0:3]) ))
-            P2_2d = np.array( self.camera_model.project3dToPixel(tuple(P2[0:3]) ))
-            P3_2d = np.array( self.camera_model.project3dToPixel(tuple(P3[0:3]) ))
-
-            P4_2d = np.array( self.camera_model.project3dToPixel(tuple(P4[0:3]) ))
-            P5_2d = np.array( self.camera_model.project3dToPixel(tuple(P5[0:3]) ))
-            P6_2d = np.array( self.camera_model.project3dToPixel(tuple(P6[0:3]) ))
-            P7_2d = np.array( self.camera_model.project3dToPixel(tuple(P7[0:3]) ))
-
-            P_2d_top = np.vstack((P0_2d,P1_2d,P2_2d,P3_2d))
-            P_2d_bottom = np.vstack((P4_2d,P5_2d,P6_2d,P7_2d))
-
-            min_2d_x = int(P_2d_top[np.argmin(P_2d_top[:,0])][0])
-            min_2d_y = int(P_2d_top[np.argmin(P_2d_top[:,1])][1])
-
-            max_2d_x = int(P_2d_bottom[np.argmax(P_2d_bottom[:,0])][0])
-            max_2d_y = int(P_2d_bottom[np.argmax(P_2d_bottom[:,1])][1])
-
-            print
-            print "object_"+str(i)
-            print "top"
-            print P_2d_top
-            print "min2d"
-            print (min_2d_x, min_2d_y) 
-            print "bottom"
-            print P_2d_bottom
-            print "max2d"
-            print (max_2d_x, max_2d_y)
-
-            pix_point_min.append((min_2d_x, min_2d_y))
-            pix_point_max.append((max_2d_x, max_2d_y))
+            pix_point_min.append(tuple(min_2d.astype(int)))
+            pix_point_max.append(tuple(max_2d.astype(int)))
 
             cap_img = img_[pix_point_min[i][1]:pix_point_max[i][1], pix_point_min[i][0]:pix_point_max[i][0]]
             cap_topic_img = self.bridge.cv2_to_imgmsg(cap_img)
             img_array_msg.images.append(cap_topic_img)
-
-            cv2.circle(img__, tuple(P0_2d.astype(int)), 5, (0, 255, 255), -1)
-            cv2.circle(img__, tuple(P1_2d.astype(int)), 5, (0, 0, 255), -1)
-            cv2.circle(img__, tuple(P2_2d.astype(int)), 5, (0, 255, 0), -1)
-            cv2.circle(img__, tuple(P3_2d.astype(int)), 5, (255, 0, 0), -1)
-
-            cv2.circle(img__, tuple(P4_2d.astype(int)), 5, (0, 120, 120), -1)
-            cv2.circle(img__, tuple(P5_2d.astype(int)), 5, (0, 0, 120), -1)
-            cv2.circle(img__, tuple(P6_2d.astype(int)), 5, (0, 120, 0), -1)
-            cv2.circle(img__, tuple(P7_2d.astype(int)), 5, (120, 0, 0), -1)
-
-            center_2d = np.array( self.camera_model.project3dToPixel((self.trans[i].transform.translation.x,self.trans[i].transform.translation.y,self.trans[i].transform.translation.z)) )
-
-            cv2.circle(img__, tuple(center_2d.astype(int)), 5, (255, 255, 0), -1)
-            cv2.imwrite("raw_img.jpg", img__)
-
 
         img_array_msg.header.stamp = bbox_.header.stamp
         img_array_msg.header.frame_id = self.cam_link_frame
