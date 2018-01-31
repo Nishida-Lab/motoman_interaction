@@ -80,13 +80,15 @@ class BBoxCapImg:
         self.camera_model.fromCameraInfo(cam_info_)
         for i, bb in enumerate(bbox_.boxes):
 
-            q = np.array([bb.pose.orientation.x,bb.pose.orientation.y,bb.pose.orientation.z,bb.pose.orientation.w])
+            # q = np.array([bb.pose.orientation.x,bb.pose.orientation.y,bb.pose.orientation.z,bb.pose.orientation.w])
+            q = np.array([self.trans[i].transform.rotation.x,self.trans[i].transform.rotation.y,self.trans[i].transform.rotation.z,self.trans[i].transform.rotation.w])
             H = tf.transformations.quaternion_matrix(q)
             # print bb
             # print H
             H[0][3] = self.trans[i].transform.translation.x
             H[1][3] = self.trans[i].transform.translation.y
             H[2][3] = self.trans[i].transform.translation.z
+
             # H[0][3] = bb.pose.position.x
             # H[1][3] = bb.pose.position.y
             # H[2][3] = bb.pose.position.z
@@ -94,6 +96,9 @@ class BBoxCapImg:
             inv_H = np.linalg.inv(H)
             # print
             # print H
+
+            print "aaaaaaaaaaaaaaa"
+            print self.trans[i]
 
             x = bb.dimensions.x
             y = bb.dimensions.y
@@ -110,13 +115,15 @@ class BBoxCapImg:
             P6 = np.dot(inv_H, np.array([x/2., y/2., -z, 1.])[:, np.newaxis])
             P7 = np.dot(inv_H, np.array([x/2., -y/2., -z, 1.])[:, np.newaxis])
 
-            P_ = np.hstack((P0,P1,P2,P3,P4,P5,P6,P7))
-            print
-            print P_ 
-            print P_[0,:].max()
+            # P0_ = self.camera_model.project3dToPixel(tuple())
 
-            # min_3d = np.empty(0)
-            # max_3d = np.empty(0)
+            P_ = np.hstack((P0,P1,P2,P3,P4,P5,P6,P7))
+            # print
+            # print P_
+            # print P_[0,:].max()
+
+            min_3d = np.empty(0)
+            max_3d = np.empty(0)
 
             # min_3d = np.append(min_3d, P_[0,:].min())
             # min_3d = np.append(min_3d, P_[1,:].min())
@@ -136,8 +143,7 @@ class BBoxCapImg:
             min_2d = np.array( self.camera_model.project3dToPixel(tuple(min_3d)) )
             max_2d = np.array( self.camera_model.project3dToPixel(tuple(max_3d)) )
 
-            print min_2d
-            print max_2d
+            center_2d = np.array( self.camera_model.project3dToPixel((self.trans[i].transform.translation.x,self.trans[i].transform.translation.y,self.trans[i].transform.translation.z)) )
 
             pix_point_min.append(tuple(min_2d.astype(int)))
             pix_point_max.append(tuple(max_2d.astype(int)))
@@ -145,6 +151,15 @@ class BBoxCapImg:
             cap_img = img_[pix_point_min[i][1]:pix_point_max[i][1], pix_point_min[i][0]:pix_point_max[i][0]]
             cap_topic_img = self.bridge.cv2_to_imgmsg(cap_img)
             img_array_msg.images.append(cap_topic_img)
+
+            print min_2d
+            print max_2d
+
+            cv2.circle(img_, tuple(center_2d.astype(int)), 5, (255, 255, 0), -1)
+            cv2.circle(img_, tuple(min_2d.astype(int)), 5, (255, 0, 0), -1)
+            cv2.circle(img_, tuple(max_2d.astype(int)), 5, (0, 0, 255), -1)
+            cv2.imwrite("raw_img.jpg", img_)
+
 
         img_array_msg.header.stamp = bbox_.header.stamp
         img_array_msg.header.frame_id = self.cam_link_frame
