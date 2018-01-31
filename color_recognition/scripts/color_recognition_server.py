@@ -30,11 +30,15 @@ class ColorRecognitionServer:
         image_cnt = 0
 
         for ros_image in ros_image_array:
-            cv_image = self.bridge.imgmsg_to_cv2(ros_image, "8UC3")
-            color_string_array.append(self.detection(cv_image))
+            try:
+                cv_image = self.bridge.imgmsg_to_cv2(ros_image, "8UC3")
+                color_string_array.append(self.detection(cv_image))
 
-            cv2.imwrite(str(image_cnt)+".jpg", cv_image)
-            image_cnt += 1
+                cv2.imwrite(str(image_cnt)+".jpg", cv_image)
+                image_cnt += 1
+
+            except CvBridgeError as e:
+                print(e)
 
         return color_string_array
 
@@ -42,15 +46,15 @@ class ColorRecognitionServer:
     def callback(self,data):
         color_msg = StringArray()
         self.image_array = copy.deepcopy(data.images.images)
-        try:
-            color_msg.header.stamp = data.images.header.stamp
-            color_msg.header.frame_id = data.images.header.frame_id
-            color_msg.strings = self.get_color_string_array(self.image_array)
-            rospy.loginfo(color_msg.header.frame_id)
-            rospy.loginfo(color_msg.strings)
-            return ImageRecognitionResponse(color_msg)
-        except CvBridgeError as e:
-            print(e)
+
+        color_msg.header.stamp = data.images.header.stamp
+        color_msg.header.frame_id = data.images.header.frame_id
+        color_msg.strings = self.get_color_string_array(self.image_array)
+
+        rospy.loginfo(color_msg.header.frame_id)
+        rospy.loginfo(color_msg.strings)
+
+        return ImageRecognitionResponse(color_msg)
 
 
 def main():
