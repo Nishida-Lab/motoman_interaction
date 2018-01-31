@@ -39,6 +39,7 @@ class ColorRecognitionServer:
 
             except CvBridgeError as e:
                 print(e)
+                return False
 
         return color_string_array
 
