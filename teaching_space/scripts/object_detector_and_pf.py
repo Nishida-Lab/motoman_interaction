@@ -300,7 +300,7 @@ if __name__ == '__main__':
                     str_command[i] = object_color_str_list[i] + " --> Box1"
                     command[i][0] = object_color_str_list[i]
                     command[i][1] = 1
-                    raw_command = [command[i][0], command[i][1]]
+                    # raw_command = [command[i][0], command[i][1]]
 
                 if goal_box2[2] - box_area_margin < center[0] and \
                    center[0] < goal_box2[3] + box_area_margin and \
@@ -309,12 +309,14 @@ if __name__ == '__main__':
                     str_command[i] = object_color_str_list[i] + " --> Box2"
                     command[i][0] = object_color_str_list[i]
                     command[i][1] = 2
-                    raw_command = [command[i][0], command[i][1]]
+                    # raw_command = [command[i][0], command[i][1]]
 
                 # Update command
                 if str_command_list[i] != str_command[i] :
                     str_command_list[i] = str_command[i]
                     command_list[i] = command[i]
+                    raw_command = [command[i][0], command[i][1]]
+                    print "update:"
                     print command[i]
 
                 cv2.circle(result_frame, center, 8, (0, 255, 255), -1)
@@ -337,7 +339,7 @@ if __name__ == '__main__':
 
         if key == ord("a"):
             send_command.publish_command(raw_command)
-            send_command.send(command_list)
+            # send_command.send(command_list)
             cv2.waitKey(0)
             # break
 
