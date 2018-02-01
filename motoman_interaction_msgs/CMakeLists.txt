@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   StringArray.msg
+  StringArrayWithStatus.msg
   ImageArray.msg
   BoundingBoxWithTag.msg
   BoundingBoxWithTagArray.msg
@@ -20,6 +21,7 @@ add_message_files(
 add_service_files(
   FILES
   ImageRecognition.srv
+  ImageRecognitionWithStatus.srv
   )
 
 generate_messages(
