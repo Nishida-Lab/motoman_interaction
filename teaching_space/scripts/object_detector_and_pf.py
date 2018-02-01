@@ -10,24 +10,42 @@ import json
 import collections as cl
 from collections import deque
 
-import rospkg
-
 from color_detection import *
 from initializer import *
 from find_objects import *
 from particle_filter import *
 
+import rospy
+import rospkg
+from motoman_interaction_msgs.msg import PickingInteraction
 
-def send_command(command_list):
-    command_message = []
-    for command in command_list:
-        if command != None:
-            command_message.append(command)
-    print
-    print "confirmed command"
-    print command_message
 
-    return command_message
+class SendCommand:
+
+    def __init__(self):
+
+        self.command_pub = rospy.Publisher('/picking_interaction', PickingInteraction, queue_size=1)
+        self.command_msg = PickingInteraction()
+
+    def publish_command(self, command):
+        self.command_msg.tag = command[0]
+        self.command_msg.num = command[1]
+        self.command_pub.publish(self.command_msg)
+        print
+        print self.command_msg
+        print "is published !!"
+
+    def send(self, command_list):
+
+        command_message = []
+        for command in command_list:
+            if command != None:
+                command_message.append(command)
+        print
+        print "confirmed command"
+        print command_message
+
+        return command_message
 
 
 if __name__ == '__main__':
@@ -52,6 +70,9 @@ if __name__ == '__main__':
 
     rospack = rospkg.RosPack()
     json_path = rospack.get_path('teaching_space')+'/json/'
+
+    rospy.init_node("teaching_space")
+    send_command = SendCommand()
 
     # 0. robot_workspace initialization
     if args["init"]:
@@ -210,8 +231,11 @@ if __name__ == '__main__':
     high_bgr_list = []
 
     object_N = len(object_color_bgr_list)
-    command_list = [None]*object_N
-    command = [None]*object_N
+    raw_command = [None, None]
+    str_command = [None]*object_N
+    str_command_list = [None]*object_N
+    command = [[0 for i in range(2)] for j in range(object_N)]
+    command_list = [[0 for i in range(2)] for j in range(object_N)]
 
     for i in range(object_N):
 
@@ -273,16 +297,23 @@ if __name__ == '__main__':
                    center[0] < goal_box1[3] + box_area_margin and \
                    goal_box1[0] - box_area_margin < center[1] and \
                    center[1] < goal_box1[1] + box_area_margin:
-                    command[i] = object_color_str_list[i] + " --> Box1"
+                    str_command[i] = object_color_str_list[i] + " --> Box1"
+                    command[i][0] = object_color_str_list[i]
+                    command[i][1] = 1
+                    raw_command = [command[i][0], command[i][1]]
 
                 if goal_box2[2] - box_area_margin < center[0] and \
                    center[0] < goal_box2[3] + box_area_margin and \
                    goal_box2[0] - box_area_margin < center[1] and \
                    center[1] < goal_box2[1] + box_area_margin:
-                    command[i] = object_color_str_list[i] + " --> Box2"
+                    str_command[i] = object_color_str_list[i] + " --> Box2"
+                    command[i][0] = object_color_str_list[i]
+                    command[i][1] = 2
+                    raw_command = [command[i][0], command[i][1]]
 
                 # Update command
-                if command_list[i] != command[i] :
+                if str_command_list[i] != str_command[i] :
+                    str_command_list[i] = str_command[i]
                     command_list[i] = command[i]
                     print command[i]
 
@@ -304,15 +335,16 @@ if __name__ == '__main__':
 
         key = cv2.waitKey(1) & 0xFF
 
-        if key == ord("q"):
-            send_command(command_list)
+        if key == ord("a"):
+            send_command.publish_command(raw_command)
+            send_command.send(command_list)
             cv2.waitKey(0)
-            break
+            # break
 
         if key == 27:
             break
 
-    send_command(command_list)
+    send_command.send(command_list)
 
     cap.release()
 
