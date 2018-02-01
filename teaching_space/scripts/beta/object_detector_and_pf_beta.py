@@ -299,6 +299,9 @@ if __name__ == '__main__':
     w, h = frame.shape[1::-1]
     image_size = (h, w)
 
+    rospack = rospkg.RosPack()
+    json_path = rospack.get_path('teaching_space')+'/scripts/beta/'
+
     # 0. robot_workspace initialization
     if args["init"]:
 
@@ -360,9 +363,6 @@ if __name__ == '__main__':
         workspace_info["robot_workspace"] = robot_workspace
         workspace_info["goal_box1"] = goal_box1
         workspace_info["goal_box2"] = goal_box2
-
-        rospack = rospkg.RosPack()
-        json_path = rospack.get_path('teaching_space')+'/scripts/beta/'
 
         fw = open(json_path + "workspace_info.json","w")
 
