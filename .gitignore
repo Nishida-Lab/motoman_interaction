@@ -1,6 +1,7 @@
 videos/
 images/
 results/
+json/
 *.jpg
 *.avi
 *.mov
