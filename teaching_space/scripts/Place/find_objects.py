@@ -32,8 +32,10 @@ def find_object(robot_workspace, img):
     contour, _ = cv2.findContours(binary_inv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # area threshold
+    # min_area = 2000
+    # max_area = 6000
     min_area = 2000
-    max_area = 6000
+    max_area = 8000
 
     object_contour = [cnt for cnt in contour if cv2.contourArea(cnt) < max_area and cv2.contourArea(cnt) > min_area]
     object_rec_list = []
