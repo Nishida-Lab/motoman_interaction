@@ -8,7 +8,7 @@ from motoman_interaction_msgs.srv import *
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
-from recognition_class import *
+from recognition_class_ import *
 
 
 class ColorRecognitionServer:
@@ -19,7 +19,7 @@ class ColorRecognitionServer:
         s = rospy.Service('color_recongnition', ImageRecognitionWithStatus, self.callback)
 
         self.bridge = CvBridge()
-        self.detection = ColorRecognition()
+        self.recognition = ColorRecognition()
         self.image_array = []
         print "waiting for client to connect"
 
@@ -33,8 +33,9 @@ class ColorRecognitionServer:
         for ros_image in ros_image_array:
             try:
                 cv_image = self.bridge.imgmsg_to_cv2(ros_image, "8UC3")
-                color_string_array.append(self.detection(cv_image))
-                status_array.append(1)
+                recognition_result, recognition_status = self.recognition(cv_image)
+                color_string_array.append(recognition_result)
+                status_array.append(recognition_status)
 
                 cv2.imwrite(str(image_cnt)+".jpg", cv_image)
                 image_cnt += 1

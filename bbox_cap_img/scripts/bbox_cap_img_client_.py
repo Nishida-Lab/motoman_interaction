@@ -170,13 +170,26 @@ class BBoxCapImg:
         try:
             color_recongnition = rospy.ServiceProxy('color_recongnition', ImageRecognitionWithStatus)
             resp = color_recongnition(img_array_msg)
+
             for i, r in enumerate(resp.results.strings):
                 pub_bbox_array_.boxes[i].tag = r
 
             self.result_bbox_pub.publish(pub_bbox_array_)
+
+            print
+            print "recognition result:"
             print resp.results.strings
+            print "recognition status:"
             print resp.results.status
+
+            if 0 in resp.results.status:
+                print "recognition falied!!"
+                print "trying to get TF again..."
+                self.trans = list()
+                return
+            
             print "Finish to Write !"
+            self.trans = list()
             # print resp.results
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
