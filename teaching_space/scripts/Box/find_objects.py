@@ -57,7 +57,9 @@ def find_object(robot_workspace, img):
 
         object_rec_list.append([object_top, object_bottom, object_left, object_right])
 
-    cv2.imshow("binary", binary)
-    cv2.imshow("objects", img_contour)
+    # cv2.imshow("binary", binary)
+    # cv2.imshow("objects", img_contour)
+
+    cv2.imshow("teaching_space", img_contour)
 
     return object_rec_list
