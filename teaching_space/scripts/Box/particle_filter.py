@@ -69,9 +69,10 @@ class ParticleFilter:
 
     # Need adjustment for tracking object velocity
     def modeling(self):
-        self.Y += np.random.random(self.SAMPLEMAX) * 100 - 50 # 2:1
-        self.X += np.random.random(self.SAMPLEMAX) * 100 - 50
-
+        # self.Y += np.random.random(self.SAMPLEMAX) * 100 - 50 # 2:1
+        # self.X += np.random.random(self.SAMPLEMAX) * 100 - 50
+        self.Y += np.random.random(self.SAMPLEMAX) * 180 - 90 # 2:1
+        self.X += np.random.random(self.SAMPLEMAX) * 180 - 90
 
     def normalize(self, weight):
         return weight / np.sum(weight)
