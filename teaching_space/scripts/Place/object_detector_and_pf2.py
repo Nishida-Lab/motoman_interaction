@@ -320,13 +320,6 @@ if __name__ == '__main__':
                     print command[i]
 
                 cv2.circle(result_frame, center, 8, (0, 255, 255), -1)
-
-                cv2.putText(result_frame, "("+str(center[0])+", "+str(center[0])+")",
-                        (center[0]+20, center[1]+50),cv2.FONT_HERSHEY_SIMPLEX, 1.0,
-                        (int(object_color_bgr_list[i][0]),
-                         int(object_color_bgr_list[i][1]),
-                         int(object_color_bgr_list[i][2])), 5)
-
                 trajectory_points_list[i].appendleft(center)
 
                 for k in range(1, len(trajectory_points_list[i])):
