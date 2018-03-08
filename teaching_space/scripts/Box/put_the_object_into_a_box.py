@@ -365,7 +365,7 @@ if __name__ == '__main__':
             display_message2 = None
             display_message1 = "multiple commands are published!!"
             display_message_color = (200, 153, 51)
-            
+
         if key == 27:
             break
 
