@@ -24,7 +24,7 @@ def find_object(robot_workspace, img):
     # top,bottom,left,right
     # img = mask
     # img = mask[robot_workspace[0][1]:robot_workspace[2][1], robot_workspace[0][0]:robot_workspace[3][0]]
-    img = img[robot_workspace[0][1]:robot_workspace[2][1], robot_workspace[1][0]:robot_workspace[3][0]]
+    # img = img[robot_workspace[0][1]:robot_workspace[2][1], robot_workspace[1][0]:robot_workspace[3][0]]
 
     #2. gray image
     grayed = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -48,9 +48,9 @@ def find_object(robot_workspace, img):
 
     # area threshold
     # min_area = 2000
-    # max_area = 6000
-    min_area = 2000
-    max_area = 8000
+    # max_area = 8000
+    min_area = 1000
+    max_area = 3500
 
     object_contour = [cnt for cnt in contour if cv2.contourArea(cnt) < max_area and cv2.contourArea(cnt) > min_area]
     object_rec_list = []
@@ -59,11 +59,11 @@ def find_object(robot_workspace, img):
 
         object_rec = cv2.boundingRect(object_contour[i])
 
-        object_top = object_rec[1] + robot_workspace[0][1]
-        object_left = object_rec[0] + robot_workspace[1][0]
+        # object_top = object_rec[1] + robot_workspace[0][1]
+        # object_left = object_rec[0] + robot_workspace[1][0]
 
-        # object_top = object_rec[1]
-        # object_left = object_rec[0]
+        object_top = object_rec[1]
+        object_left = object_rec[0]
         object_bottom = object_top + object_rec[3]
         object_right = object_left + object_rec[2]
 
