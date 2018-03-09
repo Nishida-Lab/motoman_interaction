@@ -21,12 +21,35 @@ from motoman_interaction_msgs.msg import PickingInteraction
 
 
 def get_perspective_transformation_matrix(image, robot_workspace, teaching_space_width, teaching_space_depth):
-    
+
     pts1 = np.float32(robot_workspace)
     pts2 = np.float32([[0,0],[0,teaching_space_depth], \
                        [teaching_space_width,teaching_space_depth],[teaching_space_width,0]])
     M = cv2.getPerspectiveTransform(pts1,pts2)
     return M
+
+
+def draw_lines(result_dst, image_size):
+
+    cv2.line(result_dst, (image_size[1]/2, 0), (image_size[1]/2, image_size[0]), (55, 55, 55), 1)
+    cv2.line(result_dst, (0, image_size[0]/2), (image_size[1], image_size[0]/2), (55, 55, 55), 1)
+
+    cv2.line(result_dst, (image_size[1]/2, 0), (image_size[1]/2, 100), (0, 0, 205), 10)
+    cv2.line(result_dst, (image_size[1]/2, 2), (image_size[1]/2+100, 2), (0, 205, 0), 10)
+    cv2.circle(result_dst, (image_size[1]/2, 0), 10, (205, 0, 0), -1)
+
+    cv2.putText(result_dst, "(0, 0)", (image_size[1]/2-110, 25),
+                cv2.FONT_HERSHEY_SIMPLEX, 1.0,
+                (0,225,225), 3)
+
+    return result_dst
+
+
+def transform_center(center, image_size):
+    xc = image_size[1]/2
+    y = center[0] - xc
+    x = center[1]
+    return (x,y)
 
 
 if __name__ == '__main__':
@@ -51,7 +74,7 @@ if __name__ == '__main__':
     ret, frame = cap.read()
     frame = cv2.flip(frame,-1)
     w, h = frame.shape[1::-1]
-    image_size = (h, w)
+    image_size = (teaching_space_depth, teaching_space_width)
 
     rospack = rospkg.RosPack()
     json_path = rospack.get_path('teaching_space')+'/json/'
@@ -92,9 +115,12 @@ if __name__ == '__main__':
                     initializer.press_A_cnt += 1
                     robot_workspace = initializer.robot_workspace
                     margined_robot_workspace = initializer.set_margin(teaching_space_margin)
-                    initializer.display_offset_result(frame, margined_robot_workspace)
-                    M = get_perspective_transformation_matrix(original_frame, margined_robot_workspace, \
+                    # initializer.display_offset_result(frame, margined_robot_workspace)
+                    # M = get_perspective_transformation_matrix(original_frame, margined_robot_workspace, \
+                    #                                           teaching_space_width, teaching_space_depth)
+                    M = get_perspective_transformation_matrix(frame, robot_workspace, \
                                                               teaching_space_width, teaching_space_depth)
+
                     print "Finished robot_workspace initialization press key Q."
 
             if key == ord("q"):
@@ -112,9 +138,9 @@ if __name__ == '__main__':
 
         print "saved json file."
 
-        dst = cv2.warpPerspective(original_frame, M, (teaching_space_width, teaching_space_depth))
-        cv2.imshow("initialize", dst)
-        key = cv2.waitKey(0)
+        # dst = cv2.warpPerspective(original_frame, M, (teaching_space_width, teaching_space_depth))
+        # cv2.imshow("initialize", dst)
+        # key = cv2.waitKey(0)
 
     # 1. object detection
     print "-----------------------"
@@ -134,28 +160,23 @@ if __name__ == '__main__':
 
         robot_workspace = json_data["robot_workspace"]
         margined_robot_workspace = json_data["margined_robot_workspace"]
-        M = get_perspective_transformation_matrix(frame, margined_robot_workspace, \
-                                                  teaching_space_width, teaching_space_depth)
-
-        # M = get_perspective_transformation_matrix(frame, robot_workspace, \
+        # M = get_perspective_transformation_matrix(frame, margined_robot_workspace, \
         #                                           teaching_space_width, teaching_space_depth)
 
-    ret, frame = cap.read()
-
-    frame = cv2.flip(frame,-1)
+        M = get_perspective_transformation_matrix(frame, robot_workspace, \
+                                                  teaching_space_width, teaching_space_depth)
 
     while True:
 
-        # ret, frame = cap.read()
+        ret, frame = cap.read()
 
-        # if ret == False:
-        #     break
+        if ret == False:
+            break
 
-        # frame = cv2.flip(frame,-1)
-
+        frame = cv2.flip(frame,-1)
         dst = cv2.warpPerspective(frame, M, (teaching_space_width, teaching_space_depth))
-
-        object_rec_list = find_object(robot_workspace, frame)
+        # object_rec_list = find_object(robot_workspace, frame)
+        object_rec_list = find_object(robot_workspace, dst)
 
         key = cv2.waitKey(10) & 0xFF
 
@@ -179,12 +200,13 @@ if __name__ == '__main__':
     for object_rec in object_rec_list:
 
         object_cnt += 1
-        object_image  = frame[object_rec[0]:object_rec[1], object_rec[2]:object_rec[3]]
+        object_image  = dst[object_rec[0]:object_rec[1], object_rec[2]:object_rec[3]]
         object_color_str, object_color_bgr = color_recognition(object_image)
         object_color_bgr_list.append(object_color_bgr)
         object_color_str_list.append(object_color_str)
         print "---> " + object_color_str
         print
+
 
     # 3. particle filter
     print "-----------------------"
@@ -235,6 +257,8 @@ if __name__ == '__main__':
         low_bgr_list.append(color_recognition.hsv_to_bgr(_LOWER_COLOR))
         high_bgr_list.append(color_recognition.hsv_to_bgr(_UPPER_COLOR))
 
+    cv2.namedWindow("original_frame", cv2.WINDOW_NORMAL)
+
     while True:
 
         ret, frame = cap.read()
@@ -243,11 +267,12 @@ if __name__ == '__main__':
             break
 
         frame = cv2.flip(frame,-1)
-        frame_size = frame.shape
+        cv2.imshow("original_frame",frame)
 
-        result_frame = copy.deepcopy(frame)
-
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        dst = cv2.warpPerspective(frame, M, (teaching_space_width, teaching_space_depth))
+        result_dst = copy.deepcopy(dst)
+        result_dst = draw_lines(result_dst, image_size)
+        hsv = cv2.cvtColor(dst, cv2.COLOR_BGR2HSV)
 
         for i in range(object_N):
 
@@ -261,90 +286,54 @@ if __name__ == '__main__':
             p_range_y = np.max(PF_list[i].Y)-np.min(PF_list[i].Y)
 
             for j in range(PF_list[i].SAMPLEMAX):
-                cv2.circle(result_frame, (int(PF_list[i].X[j]), int(PF_list[i].Y[j])), 2,
+                cv2.circle(result_dst, (int(PF_list[i].X[j]), int(PF_list[i].Y[j])), 2,
                            (int(object_color_bgr_list[i][0]),
                             int(object_color_bgr_list[i][1]),
                             int(object_color_bgr_list[i][2])), -1)
 
-    #         if p_range_x < object_size and p_range_y < object_size:
+            if p_range_x < object_size and p_range_y < object_size:
 
-    #             center = (int(x), int(y))
+                center = (int(x), int(y))
 
-    #             # if goal_box1[2] - box_area_margin < center[0] and \
-    #             #    center[0] < goal_box1[3] + box_area_margin and \
-    #             #    goal_box1[0] - box_area_margin < center[1] and \
-    #             #    center[1] < goal_box1[1] + box_area_margin:
-    #             #     str_command[i] = object_color_str_list[i] + " -> Box1"
-    #             #     command[i][0] = object_color_str_list[i]
-    #             #     command[i][1] = 1
+                cv2.circle(result_dst, center, 8, (0, 255, 255), -1)
 
-    #             # if goal_box2[2] - box_area_margin < center[0] and \
-    #             #    center[0] < goal_box2[3] + box_area_margin and \
-    #             #    goal_box2[0] - box_area_margin < center[1] and \
-    #             #    center[1] < goal_box2[1] + box_area_margin:
-    #             #     str_command[i] = object_color_str_list[i] + " -> Box2"
-    #             #     command[i][0] = object_color_str_list[i]
-    #             #     command[i][1] = 2
+                transformed_center = transform_center(center, image_size)
 
-    #             # # Update command
-    #             # if str_command_list[i] != str_command[i] :
-    #             #     str_command_list[i] = str_command[i]
-    #             #     command_list[i] = command[i]
-    #             #     raw_command = [command[i][0], command[i][1]]
-    #             #     print "update:"
-    #             #     print command[i]
-    #             #     display_message3 = None
-    #             #     display_message2 = None
-    #             #     display_message1 = str_command_list[i] + " (type Key A to publish)"
-    #             #     display_message_color = (0, 255, 255)
+                center_msg = '('+str(transformed_center[0])+', '+str(transformed_center[1])+')'
 
-    #             cv2.circle(result_frame, center, 8, (0, 255, 255), -1)
-    #             trajectory_points_list[i].appendleft(center)
+                cv2.putText(result_dst, center_msg, (center[0]-70,center[1]-26),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.0,
+                            (int(high_bgr_list[i][0]),int(high_bgr_list[i][1]),
+                              int(high_bgr_list[i][2])), 3)
 
-    #             for k in range(1, len(trajectory_points_list[i])):
-    #                 if trajectory_points_list[i][k - 1] is None or \
-    #                    trajectory_points_list[i][k] is None:
-    #                     continue
-    #                 cv2.line(result_frame, trajectory_points_list[i][k-1],
-    #                          trajectory_points_list[i][k],
-    #                          (int(high_bgr_list[i][0]),int(high_bgr_list[i][1]),
-    #                           int(high_bgr_list[i][2])), thickness=3)
-    #         else:
-    #             trajectory_points_list[i] = deque(maxlen=trajectory_length)
+                trajectory_points_list[i].appendleft(center)
 
-    #     # cv2.putText(result_frame, display_message1, (10,40),
-    #     #             cv2.FONT_HERSHEY_SIMPLEX, 1.0, display_message_color, 3)
+                for k in range(1, len(trajectory_points_list[i])):
+                    if trajectory_points_list[i][k - 1] is None or \
+                       trajectory_points_list[i][k] is None:
+                        continue
+                    cv2.line(result_dst, trajectory_points_list[i][k-1],
+                             trajectory_points_list[i][k],
+                             (int(high_bgr_list[i][0]),int(high_bgr_list[i][1]),
+                              int(high_bgr_list[i][2])), thickness=3)
+            else:
+                trajectory_points_list[i] = deque(maxlen=trajectory_length)
 
-    #     # cv2.putText(result_frame, display_message2, (10,40),
-    #     #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (147, 20, 255), 1)
+        cv2.imshow("teaching_space", result_dst)
 
-    #     # cv2.putText(result_frame, display_message3, (10,80),
-    #     #             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (147, 20, 255), 3)
+        key = cv2.waitKey(1) & 0xFF
 
-        cv2.imshow("teaching_space", result_frame)
+        if key == ord("a"):
+            while(1):
+                cv2.putText(result_dst, "Positions", (10, 45),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.0,(147,20,255), 3)
+                cv2.imshow("teaching_space", result_dst)
+                cv2.imshow("original_frame", frame)
+                key = cv2.waitKey(1) & 0xFF
+                if key == ord("c"):
+                    break
 
-    #     # key = cv2.waitKey(1) & 0xFF
-
-    #     # if key == ord("a"):
-    #     #     send_command.publish_command(raw_command)
-    #     #     display_message3 = None
-    #     #     display_message2 = None
-    #     #     display_message1 = "the command is published!!"
-    #     #     display_message_color = (200, 153, 51)
-
-    #     # if key == ord("c"):
-    #     #     display_message1 = None
-    #     #     display_message2 = send_command.summary(str_command_list)
-    #     #     display_message3 = "  type Key E to publish all commands" 
-
-    #     # if key == ord("e"):
-    #     #     send_command.publish_multiple_commands(command_list)
-    #     #     display_message3 = None
-    #     #     display_message2 = None
-    #     #     display_message1 = "multiple commands are published!!"
-    #     #     display_message_color = (200, 153, 51)
-
-        if key == 27:
+        if key == ord("q") or key == 27:
             break
 
     print
