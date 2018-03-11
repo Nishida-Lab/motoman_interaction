@@ -142,7 +142,7 @@ if __name__ == '__main__':
         workspace_info["goal_box1"] = goal_box1
         workspace_info["goal_box2"] = goal_box2
 
-        fw = open(json_path + "workspace_info.json","w")
+        fw = open(json_path + "workspace_info_for_clean_up.json","w")
 
         json.dump(workspace_info,fw,indent=4)
         fw.close
@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
         # load initial values of workspace
         print "Open json file."
-        json_file = open(json_path + "workspace_info.json", "r")
+        json_file = open(json_path + "workspace_info_for_clean_up.json", "r")
         json_data = json.load(json_file)
         json_file.close
 
