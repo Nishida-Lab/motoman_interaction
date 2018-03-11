@@ -37,6 +37,11 @@ def generate_color_range(dominant_hsv, h_range, v_th):
         _LOWER_COLOR = np.array([dominant_hsv[0]-10,dominant_hsv[1]-40,dominant_hsv[2]-10])
         _UPPER_COLOR = np.array([dominant_hsv[0]+10,dominant_hsv[1]+40,dominant_hsv[2]+20])
 
+    elif dominant_hsv[2] < v_th+15:
+        # for purple color tracking
+        _LOWER_COLOR = np.array([dominant_hsv[0]-8,dominant_hsv[1]-40,dominant_hsv[2]-10])
+        _UPPER_COLOR = np.array([dominant_hsv[0]+8,dominant_hsv[1]+40,dominant_hsv[2]+20])
+
     else:
 
         if dominant_hsv[0] < h_range:
