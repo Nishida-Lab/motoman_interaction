@@ -46,6 +46,7 @@ class SendCommand:
                 print
                 print self.command_msg
                 print "is published !!"
+                rospy.sleep(1.0)
 
     def summary(self, str_command_list):
 

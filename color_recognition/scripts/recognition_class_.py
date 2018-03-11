@@ -75,6 +75,12 @@ class ColorRecognition():
         elif 95 <= h and h <= 130:
             return "blue"
 
+        elif 11 <= h and h <= 16:
+            return "orange"
+
+        elif 140 <= h and h <= 160:
+            return "purple"
+
         else:
             return "others"
 
