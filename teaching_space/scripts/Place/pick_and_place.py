@@ -52,6 +52,33 @@ def transform_center(center, image_size):
     return (x,y)
 
 
+class SendCommand:
+
+    def __init__(self):
+
+        self.command_pub = rospy.Publisher('/picking_interaction', PickingInteraction, queue_size=1)
+        self.command_msg = PickingInteraction()
+
+    def publish_command(self, command):
+        self.command_msg.tag = command[0]
+        self.command_msg.num = command[1]
+        self.command_pub.publish(self.command_msg)
+        print
+        print self.command_msg
+        print "is published !!"
+
+
+# speech_command = PickingInteraction()
+# speech_command.tag = command.tag
+# # index = tag_array.index(command.tag)
+# speech_command.num = tag_array.index(command.tag) + 1
+# speech_command.xm = command.xm
+# speech_command.ym = command.ym
+# print speech_command
+# self.speech_pub.publish(speech_command)
+
+
+
 if __name__ == '__main__':
 
     # video
@@ -80,6 +107,7 @@ if __name__ == '__main__':
     json_path = rospack.get_path('teaching_space')+'/json/'
 
     rospy.init_node("teaching_space")
+    send_command = SendCommand()
 
     # 0. robot_workspace initialization
     if args["init"]:
@@ -220,7 +248,7 @@ if __name__ == '__main__':
     object_size = 300
     h_range = 10
     v_th = 50
-    box_area_margin = 10
+    moving_th = 50
 
     PF_list = []
     trajectory_points_list = []
@@ -228,18 +256,12 @@ if __name__ == '__main__':
     _UPPER_COLOR_list = []
     low_bgr_list = []
     high_bgr_list = []
+    base_flag = True
+    track_cnt = 0
 
     object_N = len(object_color_bgr_list)
-    raw_command = [None, None]
-    str_command = [None]*object_N
-    str_command_list = [None]*object_N
-    command = [[None for i in range(2)] for j in range(object_N)]
-    command_list = [[None for i in range(2)] for j in range(object_N)]
-
-    display_message1 = None
-    display_message2 = None
-    display_message3 = None
-    display_message_color = (0,0,0)
+    reference_position_list = [[None for i in range(3)] for j in range(object_N)]
+    command_list = [[None for i in range(3)] for j in range(object_N)]
 
     for i in range(object_N):
 
@@ -258,6 +280,7 @@ if __name__ == '__main__':
         high_bgr_list.append(color_recognition.hsv_to_bgr(_UPPER_COLOR))
 
     cv2.namedWindow("original_frame", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("reference_positions", cv2.WINDOW_NORMAL)
 
     while True:
 
@@ -316,10 +339,21 @@ if __name__ == '__main__':
                              trajectory_points_list[i][k],
                              (int(high_bgr_list[i][0]),int(high_bgr_list[i][1]),
                               int(high_bgr_list[i][2])), thickness=3)
+                track_cnt += 1
+                reference_position_list[i][0] = object_color_str_list[i]
+                reference_position_list[i][1] = center[0]
+                reference_position_list[i][2] = center[1]
             else:
                 trajectory_points_list[i] = deque(maxlen=trajectory_length)
+                track_cnt += 0
 
+        if base_flag and track_cnt == object_N:
+            cv2.imshow("reference_positions", result_dst)
+            print reference_position_list[i]
+            base_flag = False
+                    
         cv2.imshow("teaching_space", result_dst)
+        track_cnt = 0
 
         key = cv2.waitKey(1) & 0xFF
 
