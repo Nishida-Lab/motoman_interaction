@@ -28,7 +28,7 @@ class ColorRecognitionServer:
 
         color_string_array = []
         status_array = []
-        image_cnt = 0
+        # image_cnt = 0
 
         for ros_image in ros_image_array:
             try:
@@ -37,8 +37,8 @@ class ColorRecognitionServer:
                 color_string_array.append(recognition_result)
                 status_array.append(recognition_status)
 
-                cv2.imwrite(str(image_cnt)+".jpg", cv_image)
-                image_cnt += 1
+                # cv2.imwrite(str(image_cnt)+".jpg", cv_image)
+                # image_cnt += 1
 
             except CvBridgeError as e:
                 print(e)
