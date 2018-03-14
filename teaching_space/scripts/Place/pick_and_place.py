@@ -221,20 +221,20 @@ if __name__ == '__main__':
 
     color_recognition = ColorRecognition()
 
-    object_cnt = 0
+    # object_cnt = 0
     object_color_bgr_list = []
     object_color_str_list = []
 
     for object_rec in object_rec_list:
 
-        object_cnt += 1
+        # object_cnt += 1
         object_image  = dst[object_rec[0]:object_rec[1], object_rec[2]:object_rec[3]]
         object_color_str, object_color_bgr = color_recognition(object_image)
-        object_color_bgr_list.append(object_color_bgr)
-        object_color_str_list.append(object_color_str)
-        print "---> " + object_color_str
-        print
-
+        if object_color_str != "others":
+            object_color_bgr_list.append(object_color_bgr)
+            object_color_str_list.append(object_color_str)
+            print "---> " + object_color_str
+            print
 
     # 3. particle filter
     print "-----------------------"
@@ -278,6 +278,7 @@ if __name__ == '__main__':
         _UPPER_COLOR_list.append(_UPPER_COLOR)
         low_bgr_list.append(color_recognition.hsv_to_bgr(_LOWER_COLOR))
         high_bgr_list.append(color_recognition.hsv_to_bgr(_UPPER_COLOR))
+
 
     cv2.namedWindow("original_frame", cv2.WINDOW_NORMAL)
     cv2.namedWindow("reference_positions", cv2.WINDOW_NORMAL)
@@ -351,7 +352,7 @@ if __name__ == '__main__':
             cv2.imshow("reference_positions", result_dst)
             print reference_position_list[i]
             base_flag = False
-                    
+
         cv2.imshow("teaching_space", result_dst)
         track_cnt = 0
 

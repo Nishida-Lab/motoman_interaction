@@ -195,19 +195,20 @@ if __name__ == '__main__':
 
     color_recognition = ColorRecognition()
 
-    object_cnt = 0
+    # object_cnt = 0
     object_color_bgr_list = []
     object_color_str_list = []
 
     for object_rec in object_rec_list:
 
-        object_cnt += 1
+        # object_cnt += 1
         object_image  = frame[object_rec[0]:object_rec[1], object_rec[2]:object_rec[3]]
         object_color_str, object_color_bgr = color_recognition(object_image)
-        object_color_bgr_list.append(object_color_bgr)
-        object_color_str_list.append(object_color_str)
-        print "---> " + object_color_str
-        print
+        if object_color_str != "others":
+            object_color_bgr_list.append(object_color_bgr)
+            object_color_str_list.append(object_color_str)
+            print "---> " + object_color_str
+            print
 
     # 3. particle filter
     print "-----------------------"
