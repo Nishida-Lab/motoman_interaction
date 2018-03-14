@@ -46,7 +46,7 @@ def draw_lines(result_dst, image_size):
 
 
 def transform_center(center, image_size):
-    xc = image_size[1]/2
+    xc = int(image_size[1]/2.0)
     y = center[0] - xc
     x = center[1]
     return (x,y)
@@ -204,7 +204,7 @@ if __name__ == '__main__':
         frame = cv2.flip(frame,-1)
         dst = cv2.warpPerspective(frame, M, (teaching_space_width, teaching_space_depth))
         # object_rec_list = find_object(robot_workspace, frame)
-        object_rec_list = find_object(robot_workspace, dst)
+        object_rec_list, img_contour = find_object(robot_workspace, dst)
 
         key = cv2.waitKey(10) & 0xFF
 
@@ -260,8 +260,13 @@ if __name__ == '__main__':
     track_cnt = 0
 
     object_N = len(object_color_bgr_list)
+
+    moving_flag_list = [False for i in range(object_N)]
+    position_list = [[None for i in range(3)] for j in range(object_N)]
     reference_position_list = [[None for i in range(3)] for j in range(object_N)]
     command_list = [[None for i in range(3)] for j in range(object_N)]
+
+    cv2.namedWindow("reference_positions", cv2.WINDOW_NORMAL)
 
     for i in range(object_N):
 
@@ -279,9 +284,27 @@ if __name__ == '__main__':
         low_bgr_list.append(color_recognition.hsv_to_bgr(_LOWER_COLOR))
         high_bgr_list.append(color_recognition.hsv_to_bgr(_UPPER_COLOR))
 
+        reference_position_list[i][0] = object_color_str_list[i]
+
+        x0 = object_rec_list[i][2] + \
+             int((object_rec_list[i][3] - object_rec_list[i][2])/2.0)
+
+        y0 = object_rec_list[i][0] + \
+             int((object_rec_list[i][1] - object_rec_list[i][0])/2.0)
+
+        # initial_center = transform_center((x0,y0), image_size)
+        # reference_position_list[i][1] = initial_center[0]
+        # reference_position_list[i][2] = initial_center[1]
+
+        reference_position_list[i][1] = x0
+        reference_position_list[i][2] = y0
+
+        cv2.circle(img_contour, (x0, y0), 8, (0, 255, 255), -1)
+        cv2.imshow("reference_position", img_contour)
 
     cv2.namedWindow("original_frame", cv2.WINDOW_NORMAL)
-    cv2.namedWindow("reference_positions", cv2.WINDOW_NORMAL)
+
+    print reference_position_list
 
     while True:
 
@@ -318,8 +341,19 @@ if __name__ == '__main__':
             if p_range_x < object_size and p_range_y < object_size:
 
                 center = (int(x), int(y))
+                center_color = (0, 255, 255)
 
-                cv2.circle(result_dst, center, 8, (0, 255, 255), -1)
+                # if not base_flag:
+                x_diff = center[0] - reference_position_list[i][1]
+                y_diff = center[1] - reference_position_list[i][2]
+
+                if abs(x_diff) > moving_th or abs(y_diff) > moving_th:
+                    command_list[i][0] = reference_position_list[i][0]
+                    command_list[i][1] = y_diff ##
+                    command_list[i][2] = x_diff
+                    print "moved!"
+                    print command_list[i]
+                    center_color = (0, 0, 255)
 
                 transformed_center = transform_center(center, image_size)
 
@@ -340,18 +374,21 @@ if __name__ == '__main__':
                              trajectory_points_list[i][k],
                              (int(high_bgr_list[i][0]),int(high_bgr_list[i][1]),
                               int(high_bgr_list[i][2])), thickness=3)
-                track_cnt += 1
-                reference_position_list[i][0] = object_color_str_list[i]
-                reference_position_list[i][1] = center[0]
-                reference_position_list[i][2] = center[1]
+
+                position_list[i][0] = object_color_str_list[i]
+                position_list[i][1] = center[0]
+                position_list[i][2] = center[1]
+
+                cv2.circle(result_dst, center, 8, center_color, -1)
+
             else:
                 trajectory_points_list[i] = deque(maxlen=trajectory_length)
-                track_cnt += 0
 
-        if base_flag and track_cnt == object_N:
-            cv2.imshow("reference_positions", result_dst)
-            print reference_position_list[i]
-            base_flag = False
+        # if base_flag and track_cnt == object_N:
+        #     cv2.imshow("reference_positions", result_dst)
+        #     reference_position_list = copy.deepcopy(position_list)
+        #     print reference_position_list
+        #     base_flag = False
 
         cv2.imshow("teaching_space", result_dst)
         track_cnt = 0
