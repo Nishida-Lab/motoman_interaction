@@ -77,4 +77,4 @@ def find_object(robot_workspace, img):
     # cv2.imshow("binary", binary)
     cv2.imshow("teaching_space", img_contour)
 
-    return object_rec_list
+    return object_rec_list, img_contour
