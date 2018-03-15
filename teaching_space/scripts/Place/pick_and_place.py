@@ -59,13 +59,28 @@ class SendCommand:
         self.command_pub = rospy.Publisher('/picking_interaction', PickingInteraction, queue_size=1)
         self.command_msg = PickingInteraction()
 
-    def publish_command(self, command):
-        self.command_msg.tag = command[0]
-        self.command_msg.num = command[1]
-        self.command_pub.publish(self.command_msg)
-        print
-        print self.command_msg
-        print "is published !!"
+    def publish_command(self, command_list):
+        print "command published!"
+        print command_list
+        for command in command_list:
+            self.command_msg.tag = command[1]
+            self.command_msg.xm = command[2]
+            self.command_msg.ym = command[3]
+
+            # print
+            # print self.command_msg
+            # print "input key A to continue."
+            # while(1):
+            #     key = raw_input('>>>  ')
+            #     if key == "a":
+            #         break
+
+            self.command_pub.publish(self.command_msg)
+            print self.command_msg
+            print "is published !!"
+            rospy.sleep(3.0)
+
+        self.command_msg = PickingInteraction()
 
 
 # speech_command = PickingInteraction()
@@ -89,9 +104,11 @@ if __name__ == '__main__':
     ap.add_argument('--display_each_steps', '-d', action="store_true")
     args = vars(ap.parse_args())
 
-    teaching_space_width = 604
-    teaching_space_depth = 450
+    teaching_space_width = 600
+    teaching_space_depth = 470
     teaching_space_margin = (20,10)
+
+    moving_th = 30
 
     if not args["video_file"] == False:
         cap = cv2.VideoCapture(args["video_file"])
@@ -224,6 +241,7 @@ if __name__ == '__main__':
     # object_cnt = 0
     object_color_bgr_list = []
     object_color_str_list = []
+    object_rec_list_ = []
 
     for object_rec in object_rec_list:
 
@@ -233,6 +251,7 @@ if __name__ == '__main__':
         if object_color_str != "others":
             object_color_bgr_list.append(object_color_bgr)
             object_color_str_list.append(object_color_str)
+            object_rec_list_.append(object_rec)
             print "---> " + object_color_str
             print
 
@@ -248,7 +267,6 @@ if __name__ == '__main__':
     object_size = 300
     h_range = 10
     v_th = 50
-    moving_th = 50
 
     PF_list = []
     trajectory_points_list = []
@@ -257,14 +275,14 @@ if __name__ == '__main__':
     low_bgr_list = []
     high_bgr_list = []
     base_flag = True
-    track_cnt = 0
+    order = 0
 
     object_N = len(object_color_bgr_list)
 
     moving_flag_list = [False for i in range(object_N)]
     position_list = [[None for i in range(3)] for j in range(object_N)]
     reference_position_list = [[None for i in range(3)] for j in range(object_N)]
-    command_list = [[None for i in range(3)] for j in range(object_N)]
+    command_list = [[None for i in range(4)] for j in range(object_N)]
 
     cv2.namedWindow("reference_positions", cv2.WINDOW_NORMAL)
 
@@ -286,11 +304,11 @@ if __name__ == '__main__':
 
         reference_position_list[i][0] = object_color_str_list[i]
 
-        x0 = object_rec_list[i][2] + \
-             int((object_rec_list[i][3] - object_rec_list[i][2])/2.0)
+        x0 = object_rec_list_[i][2] + \
+             int((object_rec_list_[i][3] - object_rec_list_[i][2])/2.0)
 
-        y0 = object_rec_list[i][0] + \
-             int((object_rec_list[i][1] - object_rec_list[i][0])/2.0)
+        y0 = object_rec_list_[i][0] + \
+             int((object_rec_list_[i][1] - object_rec_list_[i][0])/2.0)
 
         # initial_center = transform_center((x0,y0), image_size)
         # reference_position_list[i][1] = initial_center[0]
@@ -300,11 +318,9 @@ if __name__ == '__main__':
         reference_position_list[i][2] = y0
 
         cv2.circle(img_contour, (x0, y0), 8, (0, 255, 255), -1)
-        cv2.imshow("reference_position", img_contour)
+        cv2.imshow("reference_positions", img_contour)
 
     cv2.namedWindow("original_frame", cv2.WINDOW_NORMAL)
-
-    print reference_position_list
 
     while True:
 
@@ -348,11 +364,16 @@ if __name__ == '__main__':
                 y_diff = center[1] - reference_position_list[i][2]
 
                 if abs(x_diff) > moving_th or abs(y_diff) > moving_th:
-                    command_list[i][0] = reference_position_list[i][0]
-                    command_list[i][1] = y_diff ##
-                    command_list[i][2] = x_diff
-                    print "moved!"
-                    print command_list[i]
+
+                    if not moving_flag_list[i]:
+                        order += 1
+                        command_list[i][0] = order
+                        moving_flag_list[i] = True
+                        print reference_position_list[i][0] + " is moved!"
+
+                    command_list[i][1] = reference_position_list[i][0]
+                    command_list[i][2] = round(y_diff * 0.001, 3) ##
+                    command_list[i][3] = round(x_diff * 0.001, 3)
                     center_color = (0, 0, 255)
 
                 transformed_center = transform_center(center, image_size)
@@ -391,19 +412,53 @@ if __name__ == '__main__':
         #     base_flag = False
 
         cv2.imshow("teaching_space", result_dst)
-        track_cnt = 0
+        # track_cnt = 0
 
         key = cv2.waitKey(1) & 0xFF
 
         if key == ord("a"):
+
+            publish_command_list = copy.deepcopy(command_list)
+
+            if [None for i in range(4)] in publish_command_list:
+                publish_command_list.remove([None for i in range(4)])
+                print publish_command_list
+
+            publish_command_list.sort(key=lambda x:x[0])
+            print "detected commands:"
+            print publish_command_list
+
+            command_N = len(publish_command_list)
+                
             while(1):
-                cv2.putText(result_dst, "Positions", (10, 45),
+                cv2.putText(result_dst, "Commands", (10, 50),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.0, (147,20,255), 3)
+
+                for i in range(command_N):
+                    cv2.putText(result_dst, str(publish_command_list[i]), (10, 90+40*i),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1.0, (147,20,255), 3)
+
+                cv2.putText(result_dst, "Type key P to publish", (10, 120+40*command_N),
                             cv2.FONT_HERSHEY_SIMPLEX, 1.0,(147,20,255), 3)
+
+                cv2.putText(result_dst, "Type key C to Cancel", (10, 160+40*command_N),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.0,(147,20,255), 3)
+
                 cv2.imshow("teaching_space", result_dst)
                 cv2.imshow("original_frame", frame)
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord("c"):
                     break
+                if key == ord("p"):
+                    send_command.publish_command(publish_command_list)
+                    command_list = [[None for i in range(4)] for j in range(object_N)]
+                    order = 0
+                    for i in range(object_N):
+                        reference_position_list[i] = copy.deepcopy(position_list[i])
+                        moving_flag_list[i] = False
+                    break
+                        
+                         
 
         if key == ord("q") or key == 27:
             break
