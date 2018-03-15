@@ -34,6 +34,7 @@ class SendCommand:
         print
         print self.command_msg
         print "is published !!"
+        self.command_msg = PickingInteraction()
 
     def publish_multiple_commands(self, command_list):
 
@@ -47,6 +48,9 @@ class SendCommand:
                 print self.command_msg
                 print "is published !!"
                 rospy.sleep(1.0)
+
+        self.command_msg = PickingInteraction()
+
 
     def summary(self, str_command_list):
 
