@@ -58,8 +58,8 @@ def capture(camera_ID, video_number):
     height = 480
     # width = 320
     # height = 240
-    brightness = 0.501960813999
-    # brightness = 0.8
+    # brightness = 0.501960813999
+    brightness = 0.58
     contrast = 0.1254902035
     saturation = 0.109803922474
 
@@ -83,12 +83,12 @@ def capture(camera_ID, video_number):
     print 'contrast: '+str(cap.get(cv2.cv.CV_CAP_PROP_CONTRAST))
     print 'saturation: '+str(cap.get(cv2.cv.CV_CAP_PROP_SATURATION))+'\n'
 
-    # cap.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, width)
-    # cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, height)
-    # cap.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, brightness)
-    # cap.set(cv2.cv.CV_CAP_PROP_CONTRAST, contrast)
-    # cap.set(cv2.cv.CV_CAP_PROP_SATURATION, saturation)
-    # cap.set(cv2.cv.CV_CAP_PROP_FPS, fps)
+    cap.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, width)
+    cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, height)
+    cap.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, brightness)
+    cap.set(cv2.cv.CV_CAP_PROP_CONTRAST, contrast)
+    cap.set(cv2.cv.CV_CAP_PROP_SATURATION, saturation)
+    cap.set(cv2.cv.CV_CAP_PROP_FPS, fps)
 
     save_path = 'videos/'
 

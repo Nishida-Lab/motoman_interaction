@@ -50,7 +50,7 @@ def find_object(robot_workspace, img):
     # min_area = 2000
     # max_area = 8000
     min_area = 1000
-    max_area = 3500
+    max_area = 5000
 
     object_contour = [cnt for cnt in contour if cv2.contourArea(cnt) < max_area and cv2.contourArea(cnt) > min_area]
     object_rec_list = []
