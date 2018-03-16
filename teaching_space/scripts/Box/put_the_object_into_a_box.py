@@ -353,19 +353,19 @@ if __name__ == '__main__':
 
         key = cv2.waitKey(1) & 0xFF
 
-        if key == ord("a"):
+        if key == ord("z"):
             send_command.publish_command(raw_command)
             display_message3 = None
             display_message2 = None
             display_message1 = "the command is published!!"
             display_message_color = (200, 153, 51)
 
-        if key == ord("c"):
+        if key == ord("a"):
             display_message1 = None
             display_message2 = send_command.summary(str_command_list)
-            display_message3 = "  type Key E to publish all commands" 
+            display_message3 = "  type Key P to publish all commands" 
 
-        if key == ord("e"):
+        if key == ord("p"):
             send_command.publish_multiple_commands(command_list)
             display_message3 = None
             display_message2 = None

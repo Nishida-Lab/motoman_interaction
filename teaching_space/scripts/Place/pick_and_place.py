@@ -60,21 +60,24 @@ class SendCommand:
         self.command_msg = PickingInteraction()
 
     def publish_command(self, command_list):
-        print "command published!"
+
+        workspace_width = 0.60
+        workspace_depth = 0.47
+        margin = 0.03
+  
+        for i in range(len(command_list)):
+            target_x = command_list[i][2]
+            target_y = command_list[i][3]
+            print "target position (x, y): ("+str(round(target_x,3))+" ,"+str(round(target_y,3))+")"
+            if target_x < margin or workspace_depth-margin < target_x or \
+               target_y < -(workspace_width/2.0)+margin or (workspace_width/2.0)-margin < target_y:
+                print "the target position of "+ command_list[i][1] +" is out of workspace!"
+
         print command_list
         for command in command_list:
             self.command_msg.tag = command[1]
             self.command_msg.xm = command[2]
             self.command_msg.ym = command[3]
-
-            # print
-            # print self.command_msg
-            # print "input key A to continue."
-            # while(1):
-            #     key = raw_input('>>>  ')
-            #     if key == "a":
-            #         break
-
             self.command_pub.publish(self.command_msg)
             print self.command_msg
             print "is published !!"
@@ -363,6 +366,8 @@ if __name__ == '__main__':
                 x_diff = center[0] - reference_position_list[i][1]
                 y_diff = center[1] - reference_position_list[i][2]
 
+                transformed_center = transform_center(center, image_size)
+
                 if abs(x_diff) > moving_th or abs(y_diff) > moving_th:
 
                     if not moving_flag_list[i]:
@@ -372,11 +377,12 @@ if __name__ == '__main__':
                         print reference_position_list[i][0] + " is moved!"
 
                     command_list[i][1] = reference_position_list[i][0]
-                    command_list[i][2] = round(y_diff * 0.001, 3) ##
-                    command_list[i][3] = round(x_diff * 0.001, 3)
+                    # command_list[i][2] = round(y_diff * 0.001, 3) ##
+                    # command_list[i][3] = round(x_diff * 0.001, 3)
+                    command_list[i][2] = round(transformed_center[0] * 0.001, 3) ##
+                    command_list[i][3] = round(transformed_center[1] * 0.001, 3)
+                   
                     center_color = (0, 0, 255)
-
-                transformed_center = transform_center(center, image_size)
 
                 center_msg = '('+str(transformed_center[0])+', '+str(transformed_center[1])+')'
 
