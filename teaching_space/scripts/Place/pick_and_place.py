@@ -323,7 +323,7 @@ if __name__ == '__main__':
         cv2.circle(img_contour, (x0, y0), 8, (0, 255, 255), -1)
         cv2.imshow("reference_positions", img_contour)
 
-    cv2.namedWindow("original_frame", cv2.WINDOW_NORMAL)
+    # cv2.namedWindow("original_frame", cv2.WINDOW_NORMAL)
 
     while True:
 
@@ -333,9 +333,10 @@ if __name__ == '__main__':
             break
 
         frame = cv2.flip(frame,-1)
-        cv2.imshow("original_frame",frame)
+        # cv2.imshow("original_frame",frame)
 
         dst = cv2.warpPerspective(frame, M, (teaching_space_width, teaching_space_depth))
+        reference_dst = copy.deepcopy(dst)
         result_dst = copy.deepcopy(dst)
         result_dst = draw_lines(result_dst, image_size)
         hsv = cv2.cvtColor(dst, cv2.COLOR_BGR2HSV)
@@ -451,7 +452,7 @@ if __name__ == '__main__':
                             cv2.FONT_HERSHEY_SIMPLEX, 1.0,(147,20,255), 3)
 
                 cv2.imshow("teaching_space", result_dst)
-                cv2.imshow("original_frame", frame)
+                # cv2.imshow("original_frame", frame)
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord("c"):
                     break
@@ -462,6 +463,9 @@ if __name__ == '__main__':
                     for i in range(object_N):
                         reference_position_list[i] = copy.deepcopy(position_list[i])
                         moving_flag_list[i] = False
+                        cv2.circle(reference_dst, (reference_position_list[i][1], reference_position_list[i][2]), 8, (0, 255, 255), -1)
+                        cv2.imshow("reference_positions", reference_dst)
+
                     break
                         
                          
