@@ -47,7 +47,7 @@ class SendCommand:
                 print
                 print self.command_msg
                 print "is published !!"
-                rospy.sleep(1.0)
+                rospy.sleep(2.0)
 
         self.command_msg = PickingInteraction()
 
