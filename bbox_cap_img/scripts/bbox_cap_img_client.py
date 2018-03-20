@@ -44,8 +44,8 @@ class BBoxCapImg:
         self.bbox_sub = rospy.Subscriber('/clustering_result', BoundingBoxArray, self.bbArrayCb, queue_size=1)
 
         # ======= Camera Callback ======== #
-        self.img_sub = rospy.Subscriber('/kinect_second/hd/image_color', Image, self.imgCb)
-        self.cam_sub = rospy.Subscriber('/kinect_second/hd/camera_info',CameraInfo, self.camInfoCb)
+        self.img_sub = rospy.Subscriber('/kinect_center/hd/image_color', Image, self.imgCb)
+        self.cam_sub = rospy.Subscriber('/kinect_center/hd/camera_info',CameraInfo, self.camInfoCb)
 
         # ======= Reconginized BoudingBox Callback ======== #
         self.result_bbox_pub = rospy.Publisher('/recognition_result', BoundingBoxArray, queue_size=1)
