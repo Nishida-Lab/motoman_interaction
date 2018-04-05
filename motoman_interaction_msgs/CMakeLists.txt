@@ -16,6 +16,7 @@ add_message_files(
   BoundingBoxWithTagArray.msg
   MotomanPicking.msg
   PickingInteraction.msg
+  PoseArray.msg
 )
 
 add_service_files(

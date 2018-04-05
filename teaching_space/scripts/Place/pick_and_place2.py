@@ -18,8 +18,8 @@ from particle_filter import *
 
 import rospy
 import rospkg
-from motoman_interaction_msgs.msg import PickingInteraction
-
+from motoman_interaction_msgs.msg import PoseArray
+import geometry_msgs.msg
 
 def get_perspective_transformation_matrix(image, robot_workspace, teaching_space_width, teaching_space_depth):
 
@@ -57,8 +57,8 @@ class SendCommand:
 
     def __init__(self):
 
-        self.command_pub = rospy.Publisher('/picking_interaction', PickingInteraction, queue_size=1)
-        self.command_msg = PickingInteraction()
+        self.command_pub = rospy.Publisher('/picking_pose_command', PoseArray, queue_size=1)
+        self.command_msg = PoseArray()
 
     def publish_command(self, command_list):
 
@@ -75,16 +75,23 @@ class SendCommand:
                 print "the target position of "+ command_list[i][1] +" is out of workspace!"
 
         print command_list
+        poses = []
+        tags = []
         for command in command_list:
-            self.command_msg.tag = command[1]
-            self.command_msg.xm = command[2]
-            self.command_msg.ym = command[3]
-            self.command_pub.publish(self.command_msg)
-            print self.command_msg
-            print "is published !!"
-            rospy.sleep(8.0)
+            pose = geometry_msgs.msg.Pose()
+            pose.position.x = command[2]
+            pose.position.y = command[3]
+            poses.append(pose)
+            tags.append(command[1])
 
-        self.command_msg = PickingInteraction()
+        self.command_msg.goal_pose = poses
+        self.command_msg.tags = tags
+        self.command_pub.publish(self.command_msg)
+        print self.command_msg
+        print "is published !!"
+        rospy.sleep(8.0)
+
+        self.command_msg = PoseArray()
 
 
 # speech_command = PickingInteraction()
