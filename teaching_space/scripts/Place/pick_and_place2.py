@@ -78,6 +78,7 @@ class SendCommand:
         poses = []
         tags = []
         for command in command_list:
+            print command
             pose = geometry_msgs.msg.Pose()
             pose.position.x = command[2]
             pose.position.y = command[3]
@@ -89,7 +90,7 @@ class SendCommand:
         self.command_pub.publish(self.command_msg)
         print self.command_msg
         print "is published !!"
-        rospy.sleep(8.0)
+        # rospy.sleep(8.0)
 
         self.command_msg = PoseArray()
 
@@ -119,7 +120,7 @@ if __name__ == '__main__':
     teaching_space_depth = 470
     teaching_space_margin = (20,10)
 
-    moving_th = 30
+    moving_th = 50
 
     if not args["video_file"] == False:
         cap = cv2.VideoCapture(args["video_file"])
