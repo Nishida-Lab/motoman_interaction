@@ -7,6 +7,7 @@ from PIL import Image
 import copy
 import argparse
 import json
+import os
 import collections as cl
 from collections import deque
 
@@ -84,6 +85,9 @@ if __name__ == '__main__':
 
     rospack = rospkg.RosPack()
     json_path = rospack.get_path('teaching_space')+'/json/'
+
+    if not os.path.isdir(json_path):
+        os.makedirs(json_path)
 
     rospy.init_node("teaching_space")
     send_command = SendCommand()
