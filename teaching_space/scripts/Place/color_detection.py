@@ -15,9 +15,6 @@ class ColorRecognition():
         size = 200, 200, 3
         self.dominant_color_display = np.zeros(size, dtype=np.uint8)
 
-        print "initialized."
-
-
     def get_dominant_color(self, cv_image):
 
         image = PIL_Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
@@ -63,7 +60,7 @@ class ColorRecognition():
         print "H: "+str(h)+" S: "+str(s)+" V: "+str(v)
 
         # if h <= 70 and s <= 50 and v <= 100:
-        if h <= 70 and s <= 80 and v <= 100:
+        if h <= 50 and v <= 50:
             return "black"
 
         if (165 <= h and h <= 180) or (0 <= h and h <= 10):
@@ -111,4 +108,4 @@ class ColorRecognition():
         # cv2.imshow("dominant", self.dominant_color_display)
         # cv2.waitKey(3)
 
-        return recognition_result
+        return recognition_result, dominant_bgr

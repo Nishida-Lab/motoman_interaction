@@ -100,15 +100,21 @@ class ColorRecognition():
 
         image = image[top:bottom, left:right]
 
+        dominant_bgr = [0] * 3
+        dominant_hsv = [0] * 3
         dominant_bgr = self.get_dominant_color(image)
-        dominant_hsv = self.bgr_to_hsv(dominant_bgr)
+        print "dominant bgr data type: "
+        print dominant_bgr
 
-        self.dominant_color_display[:] = dominant_bgr
+        if dominant_bgr == None :
+            recognition_result = "unknown"
+            recognition_status = 0
+        else:
+            dominant_hsv = self.bgr_to_hsv(dominant_bgr)
 
-        recognition_result = self.color_recognition(dominant_hsv)
+            self.dominant_color_display[:] = dominant_bgr
 
-        # cv2.imshow('image',display_image)
-        # cv2.imshow("dominant", self.dominant_color_display)
-        # cv2.waitKey(3)
+            recognition_result = self.color_recognition(dominant_hsv)
+            recognition_status = 1
 
-        return recognition_result
+        return recognition_result, recognition_status

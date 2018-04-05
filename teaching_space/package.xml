@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <package>
-  <name>color_recognition</name>
+
+  <name>teaching_space</name>
   <version>0.0.0</version>
-  <description>The color_recognition package</description>
+  <description>teaching_space</description>
 
   <maintainer email="takaki@todo.todo">takaki</maintainer>
 

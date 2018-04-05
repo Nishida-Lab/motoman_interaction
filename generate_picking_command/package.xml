@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <package>
-  <name>color_recognition</name>
+
+  <name>generate_picking_command</name>
   <version>0.0.0</version>
-  <description>The color_recognition package</description>
+  <description>The generate_picking_command package</description>
 
   <maintainer email="takaki@todo.todo">takaki</maintainer>
 

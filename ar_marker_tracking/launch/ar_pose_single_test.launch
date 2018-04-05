@@ -1,6 +1,7 @@
 <launch>
   <node pkg="rviz" type="rviz" name="rviz"
     args="-d $(find ar_pose)/launch/live_single.rviz"/>
+<<<<<<< HEAD
   <!-- <node pkg="tf" type="static_transform_publisher" name="world_to_cam" -->
   <!--       args="0 0 0.5 -1.57 0 -1.57 world camera 10" /> -->
   <!-- <node pkg="tf" type="static_transform_publisher" name="world_to_cam" -->
@@ -8,6 +9,11 @@
   <node pkg="tf" type="static_transform_publisher" name="world_to_cam"
         args="0 0 0.8 1.57 3.14 0.35  world camera 10" />
  <!-- <node ns="camera" pkg="image_proc" type="image_proc" name="image_proc"/> !-->
+=======
+  <node pkg="tf" type="static_transform_publisher" name="world_to_cam"
+    args="0 0 0.5 -1.57 0 -1.57 world camera 10" />
+  <node ns="camera" pkg="image_proc" type="image_proc" name="image_proc"/>
+>>>>>>> nishio
   <node ns="camera" pkg="uvc_camera" type="uvc_camera_node" name="uvc_camera"
     output="screen">
     <param name="width" type="int" value="640" />

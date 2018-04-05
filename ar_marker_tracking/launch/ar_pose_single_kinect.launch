@@ -3,7 +3,11 @@
     args="-d $(find ar_pose)/launch/live_single.rviz"/>
   <node pkg="tf" type="static_transform_publisher" name="world_to_cam"
     args="0 0 0.5 -1.57 0 -1.57 world camera 10" />
+<<<<<<< HEAD
   <!--<node ns="camera" pkg="image_proc" type="image_proc" name="image_proc"/> !-->
+=======
+  <node ns="camera" pkg="image_proc" type="image_proc" name="image_proc"/>
+>>>>>>> nishio
   <node ns="camera" pkg="usb_cam" type="usb_cam_node" name="usb_cam"
     output="screen">
     <param name="device" type="string" value="/dev/video1" />

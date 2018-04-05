@@ -1,9 +1,11 @@
 videos/
 images/
 results/
+json/
 *.jpg
 *.avi
 *.mov
 *.mp4
 *.pyc
+*.json
 *~
