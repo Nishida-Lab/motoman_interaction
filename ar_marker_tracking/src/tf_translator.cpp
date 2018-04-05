@@ -13,7 +13,7 @@
 // using namespace Eigen;
 
 // #include <std_msgs/String.h>
-// #include <iostream>
+#include <iostream>
 
 // void chatterCallback(const std_msgs::String::ConstPtr& msg)
 // {
@@ -26,7 +26,8 @@
 // }
 
 void GetRPY(const geometry_msgs::Quaternion &q, double &roll, double &picth, double &yaw){
-tf::Quaternion quat(q.x, q.y, q.z, q.w);
+  tf::Quaternion quat(q.x, q.y, q.z, q.w);
+  tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 }
 
 void frameCallback(const   visualization_msgs::Marker& marker, float x, float y, float z, float x_p, float y_p, float z_p, float x_o, float y_o, float z_o){
@@ -51,9 +52,11 @@ void frameCallback(const   visualization_msgs::Marker& marker, float x, float y,
 
 int main(int argc, char **argv){
   ros::init(argc, argv, "tf_translator");
-  if (argc != 2){ROS_ERROR("need turtle name as argument"); return -1;};
-  ar_marker = argv[1];
-  
+  // if (argc != 2){ROS_ERROR("need turtle name as argument"); return -1;};
+  // ar_marker = argv[1];
+
+  GetRPY();
+  std::cout << roll
   ros::NodeHandle node;
   ros::Subscriber sub = node.subscribe(ar_marker+"/pose", 10, &poseCallback);
   
