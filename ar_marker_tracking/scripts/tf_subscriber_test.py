@@ -8,9 +8,10 @@ import tf
 
 from geometry_msgs.msg import Quaternion
 from visualization_msgs.msg import Marker
-import numpy
+import numpy as np
 
 from motoman_interaction_msgs.msg import Teaching3D
+
 
 # import std_msgs 
 
@@ -30,52 +31,70 @@ class SendState:
 
     def callback(self, marker):
 
-        # sx = marker.pose.position.x
-        # sy = marker.pose.position.y
-        # sz = marker.pose.position.z
-
-        # state_array_x = [sx]
-        # state_array_y = [sy]
-        # state_array_z = [sz]
-
-        # state_array = [sx, sy, sz]
-
-        # print state_array
-
-        # q_cam_to_marker = [marker.pose.orientation.x, marker.pose.orientation.y, marker.pose.orientation.z, marker.pose.orientation.w]  
-        # # marker.pose.orientation.x
-        # # marker.pose.orientation.y
-        # # marker.pose.orientation.z
-        # # marker.pose.orientation.w
-
-        # # q_world_to_cam = tf.transformations.quaternion_from_euler(0.35, math.pi, math.pi/2)
-        # q_world_to_cam = tf.transformations.quaternion_from_euler(0.0, math.pi*5/6, math.pi*3/2)
-        # # [-0.55142435  0.67012985  0.22614282  0.44239867]
-
-        # q_world_to_marker = tf.transformations.quaternion_multiply(q_world_to_cam, q_cam_to_marker)
-
-        # print q_world_to_marker
-
-        # listener = tf.TransformLinstener()
-
         rate = rospy.Rate(10.0)
         while not rospy.is_shutdown():
             try:
                 # (trans,rot) = listener.lookupTransform('world', 'ar_marker_0',rospy.Time(0))
                 trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
-                print
-                print "raw_trans_data"
-                print trans
-                print
-                print "translation"
-                print trans.transform.translation
-                print
-                print "rotation"
-                print trans.transform.rotation
-                print
+                # print
+                # print "raw_trans_data"
+                # print trans
+                # print
+                # print "translation"
+                # print trans.transform.translation
+                # print
+                # print "rotation"
+                # print trans.transform.rotation
+                # print
+
+                # trans_lists = []
+                
+                # for i in range(100000000):
+                #     trans_lists.append(trans.transform.translation.x)
+
+                    # print "Appending translations"
+                    # print trans_lists
+
+                    # diff_x = np.diff(trans_lists)
+                    # print ("diff= "+str(diff_x))
+
+                    # if diff_x.any(deif_x < 0.05) = True:
+                    #     print "Moving..."
+                    # else:
+                    #     continue
+
+                    # print ((diff_x > 0.05).any())
+                    # print (np.any(diff_x > 0.05))                  
+
+                position_x = trans.transform.translation.x
+                
+                if abs(position_x - 0.325) >= 0.02:
+                    print "Moving!"
+                    trajectory_lists = []
+                    for i in range(10000):
+                        trajectory_lists.append(position_x)
+                        if abs(position_x - 0.100) <= 0.007:
+                            print "Finish!"
+                            break
+                else:
+                    print "Stay..."
+
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
                 continue
-        
+            
+            # try:
+            #     trans_lists = []
+            #     for i in range(10000):
+            #         trans_lists.append(trans.transform.translation)
+            #     return
+            #     print "Appending translations"
+            #     print trans_lists
+            # except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            #     continue
+
+            # np.diff(list, n=1, axis=-1)
+
+            
         # init_bottun = raw_input('>>> ')
 
         # init_bottun == '0'
