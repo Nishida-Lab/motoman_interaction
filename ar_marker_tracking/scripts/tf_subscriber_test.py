@@ -81,6 +81,10 @@ class SendState:
 
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
                 continue
+
+            else:
+                print "Finish the task"
+                break
             
             # try:
             #     trans_lists = []

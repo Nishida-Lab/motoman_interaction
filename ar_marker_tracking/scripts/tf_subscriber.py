@@ -8,7 +8,7 @@ import tf
 
 from geometry_msgs.msg import Quaternion
 from visualization_msgs.msg import Marker
-import numpy
+import numpy as np
 
 from motoman_interaction_msgs.msg import Teaching3D
 
@@ -21,52 +21,111 @@ class SendState:
         self.state_sub = rospy.Subscriber("visualization_marker", Marker, self.callback)
         self.state_pub = rospy.Publisher('/status', Teaching3D, queue_size=1)
 
-
         self.teaching_command = Teaching3D()
 
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listner = tf2_ros.TransformListener(self.tf_buffer)
+
+        # self.position_x = trans.transform.translation.x
+        # self.position_y = trans.transform.translation.y
+        # self.position_z = trans.transform.translation.z
+    
     def callback(self, marker):
-
-        # sx = marker.pose.position.x
-        # sy = marker.pose.position.y
-        # sz = marker.pose.position.z
-
-        # state_array_x = [sx]
-        # state_array_y = [sy]
-        # state_array_z = [sz]
-
-        # state_array = [sx, sy, sz]
-
-        # print state_array
-
-        q_cam_to_marker = [marker.pose.orientation.x, marker.pose.orientation.y, marker.pose.orientation.z, marker.pose.orientation.w]  
-        # marker.pose.orientation.x
-        # marker.pose.orientation.y
-        # marker.pose.orientation.z
-        # marker.pose.orientation.w
-
-        # q_world_to_cam = tf.transformations.quaternion_from_euler(0.35, math.pi, math.pi/2)
-        q_world_to_cam = tf.transformations.quaternion_from_euler(0.0, math.pi*5/6, math.pi*3/2)
-        # [-0.55142435  0.67012985  0.22614282  0.44239867]
-
-        q_world_to_marker = tf.transformations.quaternion_multiply(q_world_to_cam, q_cam_to_marker)
-
-        print q_world_to_marker
-
-        listener = tf.TransformLinstener()
-
+       
         rate = rospy.Rate(10.0)
-        while not rospy.is_shutdown():
+
+        # while not rospy.is_shutdown():
+        #     try:
+        #         trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
+        #         position_x = trans.transform.translation.x
+        #         if abs(position_x - 0.325) >= 0.02 :
+        #             print "Moving!"
+        #             trajectory_lists = []
+        #             for i in range(10000):
+        #                 trajectory_lists.append(position_x)
+        #                 if abs(position_x - 0.100) <= 0.007:
+        #                     print "Finish!"
+        #                     break
+        #         else:
+        #             print "Stay..."
+
+        #     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+        #         continue
+
+        #     else:
+        #         print "Finish the task"
+        #         break
+
+
+        get_tf_ = False
+        get_tf_flg = False
+        
+        while not get_tf_:
+        # while not rospy.is_shutdown():
+            
+            # if abs(position_x - 0.325) >= 0.02 :
+            # # if ( abs(position_x - 0.325) >= 0.02 & abs(position_y - init_y)  & abs(position_z - init_z) ) :
             try:
-                (trans,rot) = listener.lookupTransform('world', 'ar_marker_0',rospy.Time(0))
+                # (trans,rot) = listener.lookupTransform('world', 'ar_marker_0',rospy.Time(0))
+                trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
+
+                position_x = trans.transform.translation.x
+                print "Stay..."
+
+                if abs(position_x - 0.325) >= 0.02 :
+                # if ( abs(position_x - 0.325) >= 0.02 & abs(position_y - init_y)  & abs(position_z - init_z) ) :
+                    while not get_tf_flg:
+                        if abs(position_x - 0.100) <= 0.007:
+                            print "Finish!"
+                            get_tf_flg = True
+                            get_tf_ = True
+                            break
+
+                        trajectory_lists = []
+                        trajectory_lists.append(position_x)
+                        print "Moving!"
+                # else:
+                #     print "Stay..."
+                
+                # trans_lists = []
+                
+                # for i in range(100000000):
+                #     trans_lists.append(trans.transform.translation.x)
+                
+                # print "Appending translations"
+                # print trans_lists
+                
+                # diff_x = np.diff(trans_lists)
+                # print ("diff= "+str(diff_x))
+                
+                # if diff_x.any(deif_x < 0.05) = True:
+                #     print "Moving..."
+                # else:
+                #     continue
+                
+                # print ((diff_x > 0.05).any())
+                # print (np.any(diff_x > 0.05))                  
+                
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
                 continue
-        
-        # init_bottun = raw_input('>>> ')
 
-        # init_bottun == '0'
+        print "Finish the task"
 
-        # print state_array_x
-        
+        # rospy.is_shutdown()
+            
+            # try:
+            #     trans_lists = []
+            #     for i in range(10000):
+            #         trans_lists.append(trans.transform.translation)
+            #     return
+            #     print "Appending translations"
+            #     print trans_lists
+            # except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            #     continue
+
+            # np.diff(list, n=1, axis=-1)
+
+            
 if __name__ == '__main__':
     rospy.init_node('tf_subscriber', anonymous=True)
     print("init done")
