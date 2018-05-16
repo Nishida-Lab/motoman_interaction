@@ -12,6 +12,7 @@ import numpy as np
 
 from motoman_interaction_msgs.msg import Teaching3D
 
+import csv
 # import std_msgs 
 
 class SendState:
@@ -68,13 +69,16 @@ class SendState:
             try:
                 # (trans,rot) = listener.lookupTransform('world', 'ar_marker_0',rospy.Time(0))
                 trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
-
                 position_x = trans.transform.translation.x
                 print "Stay..."
 
                 if abs(position_x - 0.325) >= 0.02 :
                 # if ( abs(position_x - 0.325) >= 0.02 & abs(position_y - init_y)  & abs(position_z - init_z) ) :
                     while not get_tf_flg:
+
+                        trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
+                        position_x = trans.transform.translation.x
+
                         if abs(position_x - 0.100) <= 0.007:
                             print "Finish!"
                             get_tf_flg = True
@@ -84,6 +88,7 @@ class SendState:
                         trajectory_lists = []
                         trajectory_lists.append(position_x)
                         print "Moving!"
+                        print abs(position_x - 0.100)
                 # else:
                 #     print "Stay..."
                 
