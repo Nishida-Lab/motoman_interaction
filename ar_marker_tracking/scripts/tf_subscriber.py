@@ -30,7 +30,28 @@ class SendState:
         # self.position_x = trans.transform.translation.x
         # self.position_y = trans.transform.translation.y
         # self.position_z = trans.transform.translation.z
-    
+
+    def Initialize(self, marker):
+
+        trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
+        position_x = trans.transform.translation.x
+
+        init_position = False
+        
+        while not init_position:
+            for i in range(20):
+                init_position_list = []
+                init_position_list.append(position_x)
+                
+                if np.all(np.diff(init_position_list) < 0.01):
+                    self.init_x = position_x
+                    init_position = True
+
+                else:
+                    continue
+
+
+            
     def callback(self, marker):
        
         rate = rospy.Rate(10.0)
@@ -67,9 +88,12 @@ class SendState:
             # if abs(position_x - 0.325) >= 0.02 :
             # # if ( abs(position_x - 0.325) >= 0.02 & abs(position_y - init_y)  & abs(position_z - init_z) ) :
             try:
+
+                Initialize(x, trans.transform.translation.x)
+                
                 # (trans,rot) = listener.lookupTransform('world', 'ar_marker_0',rospy.Time(0))
-                trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
-                position_x = trans.transform.translation.x
+                # trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
+                # position_x = trans.transform.translation.x
                 print "Stay..."
 
                 if abs(position_x - 0.325) >= 0.02 :
