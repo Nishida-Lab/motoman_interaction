@@ -31,6 +31,19 @@ class SendState:
         # self.position_y = trans.transform.translation.y
         # self.position_z = trans.transform.translation.z
 
+    def getTF(self, ):
+
+        get_tf_flg = False
+
+        while not get_tf_flg:
+            try:
+                trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
+                position_x = trans.transform.translation.x
+
+            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                continue
+
+            
     def Initialize(self, marker):
 
         trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
@@ -44,13 +57,11 @@ class SendState:
                 init_position_list.append(position_x)
                 
                 if np.all(np.diff(init_position_list) < 0.01):
-                    self.init_x = position_x
+                    init_x = position_x
                     init_position = True
 
                 else:
                     continue
-
-
             
     def callback(self, marker):
        
@@ -78,10 +89,9 @@ class SendState:
         #         print "Finish the task"
         #         break
 
-
         get_tf_ = False
         get_tf_flg = False
-        
+        # ####################################################################################################
         while not get_tf_:
         # while not rospy.is_shutdown():
             
@@ -89,8 +99,8 @@ class SendState:
             # # if ( abs(position_x - 0.325) >= 0.02 & abs(position_y - init_y)  & abs(position_z - init_z) ) :
             try:
 
-                Initialize(x, trans.transform.translation.x)
-                
+                initialization = self.Initialize(self)
+
                 # (trans,rot) = listener.lookupTransform('world', 'ar_marker_0',rospy.Time(0))
                 # trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
                 # position_x = trans.transform.translation.x
