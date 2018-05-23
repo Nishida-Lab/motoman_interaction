@@ -29,7 +29,7 @@ class SendState:
         self.tf_listner = tf2_ros.TransformListener(self.tf_buffer)
 
 
-    def callback(self, marker):
+    def callback(self, message):
 
         rate = rospy.Rate(10.0)
         while not rospy.is_shutdown():

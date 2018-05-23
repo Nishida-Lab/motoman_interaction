@@ -27,102 +27,80 @@ class SendState:
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listner = tf2_ros.TransformListener(self.tf_buffer)
 
+        self.Initialize(self)
+        
+        self.trans = list()
+        
         # self.position_x = trans.transform.translation.x
         # self.position_y = trans.transform.translation.y
         # self.position_z = trans.transform.translation.z
 
-    def getTF(self, ):
+    def getTF(self, marker):
 
         get_tf_flg = False
 
         while not get_tf_flg:
             try:
-                trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
-                position_x = trans.transform.translation.x
-
+                transformation = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
+                position_x = transformation.transform.translation.x
+                get_tf_flg = True
+                
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
                 continue
 
-            
-    def Initialize(self, marker):
+        return transformation
 
-        trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
-        position_x = trans.transform.translation.x
+    def Initialize(self, maker):
 
         init_position = False
         
         while not init_position:
             for i in range(20):
-                init_position_list = []
-                init_position_list.append(position_x)
-                
-                if np.all(np.diff(init_position_list) < 0.01):
-                    init_x = position_x
-                    init_position = True
 
+                self.trans.append(self.getTF(i+1, marker.header.stamp))
+                
+                if np.all(np.diff(trans) < 0.01):
+                    init_x = self.transformation.transform.translation.x
+                    init_position = True
                 else:
                     continue
-            
+
+        return init_x
+    
+    
     def callback(self, marker):
        
         rate = rospy.Rate(10.0)
 
-        # while not rospy.is_shutdown():
-        #     try:
-        #         trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
-        #         position_x = trans.transform.translation.x
-        #         if abs(position_x - 0.325) >= 0.02 :
-        #             print "Moving!"
-        #             trajectory_lists = []
-        #             for i in range(10000):
-        #                 trajectory_lists.append(position_x)
-        #                 if abs(position_x - 0.100) <= 0.007:
-        #                     print "Finish!"
-        #                     break
-        #         else:
-        #             print "Stay..."
+        print "Searching initial position..."
+        Initialize(self.maker)
+        rospy.sleep(2)
+        print "Set the initial psition."
+        rospy.sleep(2)
+        
+        get_trajectory = False
+        movement = False
 
-        #     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-        #         continue
-
-        #     else:
-        #         print "Finish the task"
-        #         break
-
-        get_tf_ = False
-        get_tf_flg = False
-        # ####################################################################################################
-        while not get_tf_:
-        # while not rospy.is_shutdown():
-            
-            # if abs(position_x - 0.325) >= 0.02 :
-            # # if ( abs(position_x - 0.325) >= 0.02 & abs(position_y - init_y)  & abs(position_z - init_z) ) :
+        while not get_trajectory:
             try:
-
-                initialization = self.Initialize(self)
-
-                # (trans,rot) = listener.lookupTransform('world', 'ar_marker_0',rospy.Time(0))
-                # trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
-                # position_x = trans.transform.translation.x
                 print "Stay..."
 
                 if abs(position_x - 0.325) >= 0.02 :
+                    print "Moving!"
                 # if ( abs(position_x - 0.325) >= 0.02 & abs(position_y - init_y)  & abs(position_z - init_z) ) :
-                    while not get_tf_flg:
+                    while not movement:
 
-                        trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
-                        position_x = trans.transform.translation.x
+                        # getTF(self.maker)
+                        self.trans.append(self.getTF(self.transformation.transform.translation.x))
+                        # trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
+                        # position_x = trans.transform.translation.x
 
-                        if abs(position_x - 0.100) <= 0.007:
+                        if abs(self.transformation.transform.translation.x - 0.100) <= 0.007:
                             print "Finish!"
-                            get_tf_flg = True
-                            get_tf_ = True
+                            movement = True
+                            get_trajectory= True
                             break
 
-                        trajectory_lists = []
-                        trajectory_lists.append(position_x)
-                        print "Moving!"
-                        print abs(position_x - 0.100)
                 # else:
                 #     print "Stay..."
                 
