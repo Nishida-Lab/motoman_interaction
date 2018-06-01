@@ -27,7 +27,7 @@ class SendState:
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listner = tf2_ros.TransformListener(self.tf_buffer)
 
-        self.Initialize(self)
+        # self.Initialize(self)
         
         self.trans = list()
         
@@ -73,7 +73,7 @@ class SendState:
         rate = rospy.Rate(10.0)
 
         print "Searching initial position..."
-        Initialize(self.maker)
+        Initialize(self.trsnsformation)
         rospy.sleep(2)
         print "Set the initial psition."
         rospy.sleep(2)
