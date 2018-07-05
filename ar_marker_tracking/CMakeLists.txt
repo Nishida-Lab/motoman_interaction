@@ -21,5 +21,5 @@ include_directories(
 # add_executable(tf_subscriber src/tf_subscriber.cpp)
 # target_link_libraries(tf_subscriber ${catkin_LIBRARIES})
 
-add_executable(tf_translator src/tf_translator.cpp)
-target_link_libraries(tf_translator ${catkin_LIBRARIES})
+#add_executable(tf_translator src/tf_translator.cpp)
+#target_link_libraries(tf_translator ${catkin_LIBRARIES})
