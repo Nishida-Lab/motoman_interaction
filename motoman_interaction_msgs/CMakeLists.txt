@@ -17,6 +17,7 @@ add_message_files(
   MotomanPicking.msg
   PickingInteraction.msg
   PoseArray.msg
+  HandPosture.msg
 )
 
 add_service_files(
