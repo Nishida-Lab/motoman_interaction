@@ -21,7 +21,7 @@ class SendState:
     def __init__(self):
         self.state_sub = rospy.Subscriber("visualization_marker", Marker, self.callback)
         self.state_pub = rospy.Publisher('/status', Teaching3D, queue_size=1)
-        self.teaching_command = Teaching3D() #後ろに入れる？
+        self.teaching_command = Teaching3D() # go after
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listner = tf2_ros.TransformListener(self.tf_buffer)
         self.trajectory = list()
@@ -29,23 +29,23 @@ class SendState:
         self.pre_position = 0
         self.position = 0
 
-    def getTF(self, tf_time):
-        get_tf_flg = False
-        while not get_tf_flg:
-            try:
-                trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0', tf_time, rospy.Time.now())
-                # position_x = transform.transform.translation.x
-                # get_tf_flg = True
-            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                rlospy.logerr('LookupTransform Error!')
-        return trans
+    # def getTF(self, tf_time):
+    #     get_tf_flg = False
+    #     while not get_tf_flg:
+    #         try:
+    #             trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0', tf_time, rospy.Time.now())
+    #             # position_x = transform.transform.translation.x
+    #             # get_tf_flg = True
+    #         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+    #             rlospy.logerr('LookupTransform Error!')
+    #     return trans
 
 
-    def getTrajectory(self, message):
-        for i in range(1000):
-            self.trajectory.append(self.getTF(self.transform.translation.x, rospy.Time(0)))
-            print "Getting trajectories!"
-        return trajectory
+    # def getTrajectory(self, message):
+    #     for i in range(1000):
+    #         self.trajectory.append(self.getTF(self.transform.translation.x, rospy.Time(0)))
+    #         print "Getting trajectories!"
+    #     return trajectory
 
 
     def DataWriter(self, message):
@@ -55,8 +55,6 @@ class SendState:
         writer.writerow(csvlist)
         f.close()
 
-
-#####　↓ここから
 
     def callback(self, message):
         rate = rospy.Rate(10.0)
@@ -76,33 +74,28 @@ class SendState:
         while not get_trajectory:
             try:
                 now = rospy.Time.now()
-                past = now - rospy.Duration(0.01)
+                past = now - rospy.Duration(0.5)
                 trans_ = self.tf_buffer.lookup_transform('world', 'ar_marker_0', past, rospy.Duration(1.0))
                 x_ = trans_.transform.translation.x
                 trans  = self.tf_buffer.lookup_transform('world', 'ar_marker_0', now, rospy.Duration(1.0))
                 x = trans.transform.translation.x
 
+                print "Get TF"
                 # self.getTF(self.transform.translation.x, rospy.Time.now())
                 # trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
                 # position_x = trans.transform.translation.x
 
-                if abs(x_ - x) >= 0.02:
-                # if abs(position_x - 0.325) >= 0.02:
-                    print "Moving!"
+                if abs(x_ - x) >= 0.01:
                     # position_x = trans.transform.translation.x
                     # trajectory_lists = []
                     # print position_x
-
                     for i in range(10000):
-                        trajectory.append(x)
-                        if abs(x_ - x) <= 0.008:
+                        if abs(x_ - x) <= 0.005:
                             print "Finish!"
                             get_trajectory = True
                             break
-
-                elif rospy.is_shutdown():
-                    break
-
+                        self.trajectory.append(x)
+                        print "Moving!"
                 else:
                     print "Stay..."
 
