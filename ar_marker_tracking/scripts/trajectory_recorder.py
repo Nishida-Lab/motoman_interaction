@@ -57,7 +57,6 @@ class SendState:
 
 
     def callback(self, message):
-        rate = rospy.Rate(10.0)
 
         # detect_movement = False
         # while not detect_movement:
@@ -73,6 +72,7 @@ class SendState:
         get_trajectory = False
         while not get_trajectory:
             try:
+                rate = rospy.Rate(10.0)
                 now = rospy.Time.now()
                 past = now - rospy.Duration(0.5)
                 trans_ = self.tf_buffer.lookup_transform('world', 'ar_marker_0', past, rospy.Duration(1.0))
@@ -85,18 +85,20 @@ class SendState:
                 # trans = self.tf_buffer.lookup_transform('world', 'ar_marker_0',rospy.Time(0))
                 # position_x = trans.transform.translation.x
 
-                if abs(x_ - x) >= 0.01:
+                if abs(x - x_) >= 0.01:
                     # position_x = trans.transform.translation.x
                     # trajectory_lists = []
                     # print position_x
+                    # movement_stop
+                    # while not movement_stop
                     for i in range(10000):
-                        if abs(x_ - x) <= 0.005:
+                        if abs(x - x_) <= 0.005:
                             print "Finish!"
                             get_trajectory = True
                             break
                         self.trajectory.append(x)
-                        print "Moving!"
-                        
+                        # print "Moving!"
+                        print x                        
                 else:
                     print "Stay..."
 
