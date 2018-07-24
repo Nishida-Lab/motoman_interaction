@@ -26,52 +26,21 @@ class SendState:
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listner = tf2_ros.TransformListener(self.tf_buffer)
         self.trajectory = list()
-        # self.trans = list()
 
         self.get_trajectory_flg = True
         self.move_flg = False
-
-    def getTF(self, tf_time):
-        while self.get_trajectory_flg:
-            try:
-                transformation = self.tf_buffer.lookup_transform('world', 'ar_marker_0', tf_time, rospy.Time.now())
-                trans = np.array(
-                    x = transformation.transform.translation.x,
-                    y = transformation.transform.translation.y,
-                    z = transformation.transform.translation.z,
-                    x_r = transformation.transform.rotation.x,
-                    y_r = transformation.transform.rotation.y,
-                    z_r = transformation.transform.rotation.z,
-                    w = transformation.transform.rotation.w
-                )
-                # x = transformation.transform.translation.x
-                # y = transformation.transform.translation.x
-                # z = transformation.transform.translation.x
-                # x_r = transformation.transform.rotation.x
-                # y_r = transformation.transform.rotation.y
-                # z_r = transformation.transform.rotation.z
-                # w = transformation.transform.rotation.w
-
-                # self.trans.append(x, y, z, x_r, y_r, z_r, w)
-
-            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                rlospy.logerr('LookupTransform Error!')
-        return trans
+        self.get_data_flg = False
 
 
-    # def getTrajectory(self, message):
-    #     for i in range(1000):
-    #         self.trajectory.append(self.getTF(self.transform.translation.x, rospy.Time(0)))
-    #         print "Getting trajectories!"
-    #     return trajectory
-
-
-    def DataWriter(self, message):
-        f = open('trajectory.csv', w)
-        writer = csv.writer(f, lineterminator = '\n')
-        csvlist = trajectory
-        writer.writerow(csvlist)
-        f.close()
+    def DataWriter(self, trajectory_list):
+        file = open('trajectory.txt', 'w')
+        file.write("translation: x, y, z, rotation: x, y, z, w\n")
+        for point in trajectory_list:
+            for value in point:
+                file.write(str(value)+",")
+            file.write("\n")
+        file.write("task finished.")
+        file.close()
 
 
     def callback(self, message):
@@ -95,8 +64,6 @@ class SendState:
                 z_q = trans.transform.rotation.z
                 w = trans.transform.rotation.w
 
-                r = math.sqrt((x - x_)**2 + (y - y_)**2 + (z - z_)**2)
-
                 translation = np.array([x, y, z])
 
                 quaternion = np.array([x_q, y_q, z_q, w])
@@ -108,7 +75,8 @@ class SendState:
 
                 transformation = [x, y, z, x_q, y_q, z_q, w]
 
-                # transformation = np.array([translation, quaternion])
+                r = math.sqrt((x - x_)**2 + (y - y_)**2 + (z - z_)**2)
+
                 print "Got TF"
 
                 if r >= 0.01:
@@ -128,14 +96,15 @@ class SendState:
                 continue
 
         print "Finish the task"
+        if self.get_data_flg:
+            print "Finish "
+            return
 
-        file = open('trajectory.txt', 'w')
-        # writer = csv.writer(f, lineterminator = '\n')
-        # csvlist = self.trajectory
-        file.write(csvlist)
-        print self.csvlist
-
-        print self.trajectory
+        self.DataWriter(self.trajectory)
+        
+        self.get_data_flg = True
+        
+        # print self.trajectory
 
 if __name__ == '__main__':
     rospy.init_node('tf_subscriber', anonymous=True)
