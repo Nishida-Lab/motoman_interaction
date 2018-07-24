@@ -96,6 +96,7 @@ class SendState:
                             break
                         self.trajectory.append(x)
                         print "Moving!"
+                        
                 else:
                     print "Stay..."
 
