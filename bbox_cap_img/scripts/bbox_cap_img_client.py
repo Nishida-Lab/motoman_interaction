@@ -80,7 +80,7 @@ class BBoxCapImg:
         for i in range(len(bbox_.boxes)):
             self.trans.append(self.getTF(i+1, rospy.Time(0)))
             # self.trans.append(self.getTF(i+1, bbox_.header.stamp))
- 
+
         print "Finish to get TF !"
         self.camera_model.fromCameraInfo(cam_info_)
 
@@ -132,7 +132,7 @@ class BBoxCapImg:
             print "top"
             print P_2d_top
             print "min2d"
-            print (min_2d_x, min_2d_y) 
+            print (min_2d_x, min_2d_y)
             print "bottom"
             print P_2d_bottom
             print "max2d"
@@ -145,21 +145,20 @@ class BBoxCapImg:
             cap_topic_img = self.bridge.cv2_to_imgmsg(cap_img)
             img_array_msg.images.append(cap_topic_img)
 
-            cv2.circle(img__, tuple(P0_2d.astype(int)), 5, (0, 255, 255), -1)
-            cv2.circle(img__, tuple(P1_2d.astype(int)), 5, (0, 0, 255), -1)
-            cv2.circle(img__, tuple(P2_2d.astype(int)), 5, (0, 255, 0), -1)
-            cv2.circle(img__, tuple(P3_2d.astype(int)), 5, (255, 0, 0), -1)
+            # cv2.circle(img__, tuple(P0_2d.astype(int)), 5, (0, 255, 255), -1)
+            # cv2.circle(img__, tuple(P1_2d.astype(int)), 5, (0, 0, 255), -1)
+            # cv2.circle(img__, tuple(P2_2d.astype(int)), 5, (0, 255, 0), -1)
+            # cv2.circle(img__, tuple(P3_2d.astype(int)), 5, (255, 0, 0), -1)
 
-            cv2.circle(img__, tuple(P4_2d.astype(int)), 5, (0, 120, 120), -1)
-            cv2.circle(img__, tuple(P5_2d.astype(int)), 5, (0, 0, 120), -1)
-            cv2.circle(img__, tuple(P6_2d.astype(int)), 5, (0, 120, 0), -1)
-            cv2.circle(img__, tuple(P7_2d.astype(int)), 5, (120, 0, 0), -1)
+            # cv2.circle(img__, tuple(P4_2d.astype(int)), 5, (0, 120, 120), -1)
+            # cv2.circle(img__, tuple(P5_2d.astype(int)), 5, (0, 0, 120), -1)
+            # cv2.circle(img__, tuple(P6_2d.astype(int)), 5, (0, 120, 0), -1)
+            # cv2.circle(img__, tuple(P7_2d.astype(int)), 5, (120, 0, 0), -1)
 
-            center_2d = np.array( self.camera_model.project3dToPixel((self.trans[i].transform.translation.x,self.trans[i].transform.translation.y,self.trans[i].transform.translation.z)) )
+            # center_2d = np.array( self.camera_model.project3dToPixel((self.trans[i].transform.translation.x,self.trans[i].transform.translation.y,self.trans[i].transform.translation.z)) )
 
-            cv2.circle(img__, tuple(center_2d.astype(int)), 5, (255, 255, 0), -1)
-            cv2.imwrite("raw_img.jpg", img__)
-
+            # cv2.circle(img__, tuple(center_2d.astype(int)), 5, (255, 255, 0), -1)
+            # cv2.imwrite("raw_img.jpg", img__)
 
         img_array_msg.header.stamp = bbox_.header.stamp
         img_array_msg.header.frame_id = self.cam_link_frame
@@ -187,7 +186,7 @@ class BBoxCapImg:
                 print "trying to get TF again..."
                 self.trans = list()
                 return
-            
+
             print "Finish to Write !"
             self.trans = list()
             # print resp.results
