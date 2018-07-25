@@ -1,5 +1,5 @@
 int8 id
 string type
-Vector3 position
-Vector3 pose
+geometry_msgs/Vector3 position
+geometry_msgs/Vector3 pose
 float32 gripper
