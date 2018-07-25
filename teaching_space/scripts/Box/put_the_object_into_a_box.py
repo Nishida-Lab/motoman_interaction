@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import cv2
-import cv2.cv as cv
 import numpy as np
 import colorsys
 from PIL import Image
@@ -367,7 +366,7 @@ if __name__ == '__main__':
         if key == ord("a"):
             display_message1 = None
             display_message2 = send_command.summary(str_command_list)
-            display_message3 = "  type Key P to publish all commands" 
+            display_message3 = "  type Key P to publish all commands"
 
         if key == ord("p"):
             send_command.publish_multiple_commands(command_list)
