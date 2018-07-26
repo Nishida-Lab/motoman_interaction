@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import cv2
-import cv2.cv as cv
 import copy
 
 
@@ -29,7 +28,7 @@ def find_object(robot_workspace, img):
     binary_inv = cv2.bitwise_not(binary)
 
     #5. recognize contour and rectangle
-    contour, _ = cv2.findContours(binary_inv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    _, contour, _ = cv2.findContours(binary_inv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # area threshold
     # min_area = 2000

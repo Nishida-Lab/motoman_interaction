@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 import cv2
-import cv2.cv as cv
-
 
 class Initializer:
 
@@ -37,7 +35,7 @@ class Initializer:
                 self.goal_box2[0] = y
                 self.goal_box2[2] = x
 
-        elif event == cv2.EVENT_RBUTTONUP:
+        elif event == cv2.EVENT_MBUTTONUP:
             print "right x: " +str(x) + " y: " + str(y)
 
             if not self.robot_workspace_done:
