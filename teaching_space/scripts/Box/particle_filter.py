@@ -53,8 +53,8 @@ def generate_color_range(dominant_hsv, h_range, v_th):
         else:
             high_h = dominant_hsv[0] + h_range
 
-            _LOWER_COLOR = np.array([low_h,80,80])
-            _UPPER_COLOR = np.array([high_h,255,255])
+        _LOWER_COLOR = np.array([low_h,80,80])
+        _UPPER_COLOR = np.array([high_h,255,255])
 
     return _LOWER_COLOR, _UPPER_COLOR
 
